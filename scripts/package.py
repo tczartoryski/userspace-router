@@ -9,7 +9,8 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 FILES = ['Cargo.toml', 'Cargo.lock', 'README.md', 'docs/ARCHITECTURE.md', 'docs/architecture.svg',
          'docs/RELEASE-STATUS.md', 'docs/DEMO-VIDEO.md', 'docs/qa/BROWSER-BLOCKER.md',
-         'docs/qa/RENDERED-QA.md']
+         'docs/qa/RENDERED-QA.md', 'docs/PUBLICATION-AUDIT.md',
+         'docs/img/banner.svg', 'docs/img/PROVENANCE.md']
 # Only approved sanitized captures; never sweep the evidence directory.
 RENDERED_FILES = ['docs/qa/rendered/' + name for name in
                   ('desktop.jpg', 'mobile.jpg', 'offline.png', 'live-demo.mov', 'capture-times.json')]
@@ -43,13 +44,9 @@ def build(output):
             if source.is_symlink():
                 raise ValueError('symlink forbidden: '+name)
             raw = source.read_bytes()
-            if name in ('README.md', 'docs/ARCHITECTURE.md'):
+            if name == 'docs/ARCHITECTURE.md':
                 text = raw.decode()
-                # Replace legacy reproduction/evidence sections with release-specific docs.
-                if name == 'README.md':
-                    text = RELEASE_README
-                else:
-                    text = sanitize_architecture(text)
+                text = sanitize_architecture(text)
                 raw = text.encode()
             # Audit code for secrets but permit the auditor's own literal pattern.
             if name not in BINARY_FILES and name != 'scripts/package.py' and pattern.search(raw):
@@ -63,33 +60,6 @@ def build(output):
     print(f'Package audit passed: {len(files)} allowlisted files; {output}')
 
 
-RELEASE_README = '''# Userspace Router
-
-Real IPv4/UDP forwarding and endpoint-dependent SNAT through precreated Linux TUN
-interfaces. Kernel forwarding/NAT does not perform the dataplane. No dependencies.
-Repository: `tczartoryski/userspace-router` (private, owner-approved). License remains pending owner decision. No license grant.
-
-Verified: 17 Rust and 27 Python tests; rendered desktop/mobile and keyboard QA
-passed November 7, 2026. The genuine sampled video replays 12 captures at 1 FPS;
-it is speed-adjusted, not continuous realtime footage. See docs/qa/RENDERED-QA.md.
-
-Portable checks: `cargo test --locked --offline` and
-`python3 -m unittest discover -s scripts -p 'test_*.py'`.
-Linux requires an explicitly approved isolated environment with existing iproute2,
-Python 3, Rust and /dev/net/tun. Never run namespace setup on a shared host.
-Inside the approved Ubuntu lab: `bash scripts/guest-demo.sh` runs both extended
-real-packet suites. `bash scripts/guest-demo.sh --retain` also retains real traffic
-for QA until Ctrl-C cleans up namespaces and processes.
-
-On the approved Lima host, `python3 scripts/demo.py` copies only the release
-allowlist, starts the guest demo and localhost dashboard, and stops the VM on exit.
-Use http://127.0.0.1:8765. Ctrl-C or SIGTERM stops and cleans up.
-The dashboard is read-only; snapshots contain sensitive network tuples, hidden
-by default. Stale and offline snapshots are labeled. No public listener or CDN.
-
-See docs/ARCHITECTURE.md, docs/RELEASE-STATUS.md, docs/DEMO-VIDEO.md and
-[architecture diagram](docs/architecture.svg). No production/throughput claim.
-'''
 if __name__ == '__main__':
     import sys
     build(sys.argv[1] if len(sys.argv)>1 else '/tmp/udp-router-release.tar.gz')

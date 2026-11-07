@@ -67,6 +67,9 @@ class PackageTests(unittest.TestCase):
             first = root / 'first.tar.gz'
             package.build(first)
             original = self.read_archive(first, expected)
+            self.assertEqual(original['README.md'], (package.ROOT / 'README.md').read_bytes())
+            from test_documentation import check_documents
+            self.assertEqual(check_documents(package.ROOT, package.FILES), [])
             fresh = root / 'fresh'
             fresh.mkdir()
             # Extract only after validating all members against the allowlist.
