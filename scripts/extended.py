@@ -86,10 +86,28 @@ def verify(directory):
     print('PASS extended real UDP: distinct clients, exhaustion, idle expiry, longest-prefix policy, stopped-router control')
 
 
+def pulse_exchange(sock, budget=5.0, attempt_timeout=0.5):
+    """Bounded real exchange retries on one tuple; validation errors fail at once."""
+    deadline = time.monotonic() + budget
+    attempts = 0
+    while True:
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise TimeoutError(f'retained UDP exchange deadline exceeded after {attempts} attempts')
+        sock.settimeout(min(attempt_timeout, remaining))
+        attempts += 1
+        try:
+            exchange(sock, b'live-demo')
+        except socket.timeout:
+            print(f'retained UDP attempt {attempts} timed out', file=sys.stderr, flush=True)
+            continue
+        return
+
+
 def pulse():
     with ttl_socket() as sock:
         sock.bind(('10.0.0.2', 12345))
-        exchange(sock, b'live-demo')
+        pulse_exchange(sock)
 
 
 if __name__ == '__main__':

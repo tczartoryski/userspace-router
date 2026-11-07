@@ -4,6 +4,10 @@ Real IPv4/UDP forwarding and endpoint-dependent SNAT through precreated Linux TU
 interfaces. Kernel forwarding/NAT does not perform the dataplane. No dependencies.
 Repository: `tczartoryski/userspace-router` (private, owner-approved). License remains pending owner decision. No license grant.
 
+Verified: 17 Rust and 27 Python tests; rendered desktop/mobile and keyboard QA
+passed November 7, 2026. The genuine sampled video replays 12 captures at 1 FPS;
+it is speed-adjusted, not continuous realtime footage. See docs/qa/RENDERED-QA.md.
+
 Portable checks: `cargo test --locked --offline` and
 `python3 -m unittest discover -s scripts -p 'test_*.py'`.
 Linux requires an explicitly approved isolated environment with existing iproute2,

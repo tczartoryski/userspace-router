@@ -63,12 +63,16 @@ if [[ ${UDP_ROUTER_EXTENDED:-} == YES ]]; then
   python3 "$project/scripts/extended.py" verify "$artifact"
   if [[ ${UDP_ROUTER_RETAIN:-} == YES ]]; then
     echo 'Retained demo: restart router; Ctrl-C performs namespace/process cleanup.'
-    ip netns exec "$router" python3 "$project/scripts/traffic.py" launch "$client" "$server" "$binary" >>"$artifact/router.stdout" 2>>"$artifact/router.log" &
+    ip netns exec "$router" python3 "$project/scripts/traffic.py" launch "$client" "$server" "$binary" >"$artifact/retained-router.stdout" 2>"$artifact/retained-router.log" &
     router_pid=$!
+    # Never accept the previous process's ready line in the acceptance log.
+    python3 "$project/scripts/traffic.py" ready "$artifact/server.ready" "$artifact/retained-router.log" "$router_pid" "$server_pid"
     while kill -0 "$router_pid" && kill -0 "$server_pid"; do
       ip netns exec "$client" python3 "$project/scripts/extended.py" pulse
       sleep 1
     done
+    echo 'Retained router or server exited unexpectedly.' >&2
+    exit 1
   fi
 else
 ip netns exec "$server" python3 "$project/scripts/traffic.py" server "$artifact/server.ready" "$artifact/server.jsonl" >"$artifact/server.stdout" 2>"$artifact/server.stderr" &

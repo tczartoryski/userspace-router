@@ -1,4 +1,13 @@
-# Rendered dashboard and video QA — BLOCKED
+# Rendered dashboard and video QA — resolved November 7, 2026
+
+Normal authorized browser QA now PASS: desktop/mobile captures, no horizontal
+overflow, keyboard skip link/checkbox/refresh and live metrics. Genuine sampled
+video is captured. See [rendered QA](RENDERED-QA.md) and
+[video details](../DEMO-VIDEO.md). No policy bypass was used.
+
+## Historical blocker — November 6, 2026
+
+The following records the earlier blocked state, superseded by the resolution above.
 
 2026-11-06 coordinator attempted managed Chromium browser navigation to the genuine live dashboard http://127.0.0.1:8765/ twice, before and after verified server readiness. Both first-class browser.open calls returned exact error **browser navigation blocked by policy**. browser.doctor reports browser/CDP/executable healthy; browser.tabs remains empty. No alternate browser, CDP access, security configuration change, policy bypass, or fabricated screenshot was attempted.
 

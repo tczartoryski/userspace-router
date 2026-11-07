@@ -8,7 +8,14 @@ import tempfile
 
 ROOT = Path(__file__).resolve().parent.parent
 FILES = ['Cargo.toml', 'Cargo.lock', 'README.md', 'docs/ARCHITECTURE.md', 'docs/architecture.svg',
-         'docs/RELEASE-STATUS.md', 'docs/DEMO-VIDEO.md', 'docs/qa/BROWSER-BLOCKER.md']
+         'docs/RELEASE-STATUS.md', 'docs/DEMO-VIDEO.md', 'docs/qa/BROWSER-BLOCKER.md',
+         'docs/qa/RENDERED-QA.md']
+# Only approved sanitized captures; never sweep the evidence directory.
+RENDERED_FILES = ['docs/qa/rendered/' + name for name in
+                  ('desktop.jpg', 'mobile.jpg', 'offline.png', 'live-demo.mov', 'capture-times.json')]
+RENDERED_FILES.extend(f'docs/qa/rendered/frames/{index:04d}.png' for index in range(12))
+BINARY_FILES = frozenset(name for name in RENDERED_FILES if not name.endswith('.json'))
+FILES.extend(RENDERED_FILES)
 for folder in ('src', 'tests', 'scripts', 'dashboard'):
     FILES.extend(str(p.relative_to(ROOT)) for p in (ROOT/folder).rglob('*')
                  if p.is_file() and p.suffix in ('.rs', '.py', '.sh', '.html', '.css', '.js', '.swift'))
@@ -45,7 +52,7 @@ def build(output):
                     text = sanitize_architecture(text)
                 raw = text.encode()
             # Audit code for secrets but permit the auditor's own literal pattern.
-            if name != 'scripts/package.py' and pattern.search(raw):
+            if name not in BINARY_FILES and name != 'scripts/package.py' and pattern.search(raw):
                 raise ValueError('secret/internal-path audit failed: '+name)
             target = stage/name; target.parent.mkdir(parents=True, exist_ok=True); target.write_bytes(raw)
         manifest = ''.join(hashlib.sha256((stage/n).read_bytes()).hexdigest()+'  '+n+'\n' for n in files)
@@ -61,6 +68,10 @@ RELEASE_README = '''# Userspace Router
 Real IPv4/UDP forwarding and endpoint-dependent SNAT through precreated Linux TUN
 interfaces. Kernel forwarding/NAT does not perform the dataplane. No dependencies.
 Repository: `tczartoryski/userspace-router` (private, owner-approved). License remains pending owner decision. No license grant.
+
+Verified: 17 Rust and 27 Python tests; rendered desktop/mobile and keyboard QA
+passed November 7, 2026. The genuine sampled video replays 12 captures at 1 FPS;
+it is speed-adjusted, not continuous realtime footage. See docs/qa/RENDERED-QA.md.
 
 Portable checks: `cargo test --locked --offline` and
 `python3 -m unittest discover -s scripts -p 'test_*.py'`.

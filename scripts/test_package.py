@@ -1,6 +1,7 @@
 """Portable release round-trip checks; no VM or live packet integration."""
 import hashlib
 from pathlib import Path, PurePosixPath
+import posixpath
 import re
 import subprocess
 import sys
@@ -37,6 +38,9 @@ class PackageTests(unittest.TestCase):
             self.assertTrue(all(m.isfile() for m in members))
             contents = {m.name.removeprefix('udp-router/'): archive.extractfile(m).read()
                         for m in members}
+        self.assertTrue(package.BINARY_FILES <= contents.keys())
+        self.assertEqual({name for name in contents if name.startswith('docs/qa/rendered/')},
+                         set(package.RENDERED_FILES))
         manifest = ''.join(hashlib.sha256(contents[name]).hexdigest() + '  ' + name + '\n'
                            for name in sorted(contents) if name != 'MANIFEST.sha256')
         self.assertEqual(contents['MANIFEST.sha256'].decode(), manifest)
@@ -44,7 +48,7 @@ class PackageTests(unittest.TestCase):
         forbidden = re.compile(b'/Users' + b'/|/home/' + b'openclaw|codex-' +
                                b'run|BEGIN [A-Z ]*PRIVATE KEY|gh[pousr]_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,}')
         for name, raw in contents.items():
-            if name != 'scripts/package.py':
+            if name not in package.BINARY_FILES and name != 'scripts/package.py':
                 self.assertIsNone(forbidden.search(raw), name)
             if name.endswith('.md'):
                 for target in re.findall(r'!?\[[^\]]*\]\(([^\s)]+)\)', raw.decode()):
@@ -52,7 +56,7 @@ class PackageTests(unittest.TestCase):
                     if link.scheme or link.netloc or not link.path:
                         continue
                     resolved = PurePosixPath(name).parent / unquote(link.path)
-                    self.assertIn(str(resolved), contents, (name, target))
+                    self.assertIn(posixpath.normpath(str(resolved)), contents, (name, target))
         return contents
 
     def test_extracted_release_repackages_with_same_allowlist_and_manifest(self):
