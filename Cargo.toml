@@ -1,0 +1,14 @@
+[package]
+name = "userspace-udp-router"
+version = "0.1.0"
+edition = "2021"
+# License pending owner decision; no license grant.
+description = "Bounded userspace IPv4 UDP router with endpoint-dependent SNAT"
+
+[features]
+# Allows cargo check of Linux adapter code on non-Linux; never runs it there.
+linux-abi-check = []
+
+[[bin]]
+name = "udp-router"
+path = "src/bin/udp-router.rs"
