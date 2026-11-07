@@ -1,6 +1,6 @@
 # Release status
 
-Public visibility is requested for tczartoryski/userspace-router after audit. Visibility has not been verified in this checkout. License remains pending owner decision; no license grant is implied. See [publication audit](PUBLICATION-AUDIT.md).
+Public repository tczartoryski/userspace-router: visibility verified through GitHub metadata and unauthenticated source retrieval on November 7, 2026, after reachable-history and media audit. License remains pending owner decision; no license grant is implied. See [publication audit](PUBLICATION-AUDIT.md).
 
 ## Verified
 - 17 Rust tests pass on macOS and native Ubuntu ARM64; formatting and strict Clippy (including Linux adapter static checks) pass.

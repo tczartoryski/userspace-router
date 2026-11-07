@@ -80,4 +80,4 @@ Demo lifecycle owns namespace processes and private artifacts, supports retained
 traffic for coordinator QA, and provides explicit stop/cleanup. Host orchestration
 copies only allowlisted task files, with no mounts, installs or host networking.
 Release packaging uses an explicit file allowlist and audits secrets/internal
-paths; historical local evidence remains outside the release archive. Repository name `tczartoryski/userspace-router` is intentional; public visibility is requested after audit and has not been verified here. Licensing remains pending; no license grant is implied.
+paths; historical local evidence remains outside the release archive. Repository `tczartoryski/userspace-router` is public after the owner-authorized reachable-history and media audit; GitHub metadata and unauthenticated retrieval were verified on November 7, 2026. Licensing remains pending; no license grant is implied.

@@ -94,7 +94,7 @@ This is an experimental IPv4/UDP router. TCP, IPv6, fragmentation, L2 and ICMP
 generation are unsupported. There is no throughput or production-readiness claim;
 the stdlib dashboard is a local lab tool.
 
-Public visibility is requested after audit; it has **not been verified here**.
+[Public repository](https://github.com/tczartoryski/userspace-router), published after a reachable-history and media audit.
 No license has been selected and no license grant is made. No release or deployment
 is published by this documentation change. See [publication audit](docs/PUBLICATION-AUDIT.md).
 
