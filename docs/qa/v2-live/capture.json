@@ -1,0 +1,491 @@
+{
+  "kind": "ACTUAL-LIVE-BROWSER-SAMPLED",
+  "target_fps": 1,
+  "disclosure": "44 genuine browser stills targeted at1Hz, encoded1frame per second; not continuous full-frame-rate footage. No DOM or timestamps changed. Actual elapsed capture times retained; no audio.",
+  "frames": [
+    {
+      "index": 0,
+      "elapsed_ms": 635,
+      "state": {
+        "status": "Connecting to runtime\u2026",
+        "age": "Waiting for a genuine process snapshot.",
+        "workers": 0,
+        "overview": ""
+      },
+      "sha256": "5f79cad6db321da1598c8dfcc465b9e3a3b1ab965eac3565a02a25f7484c1473"
+    },
+    {
+      "index": 1,
+      "elapsed_ms": 1531,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Runtime unavailable. No current metrics.",
+        "workers": 0,
+        "overview": ""
+      },
+      "sha256": "5f79cad6db321da1598c8dfcc465b9e3a3b1ab965eac3565a02a25f7484c1473"
+    },
+    {
+      "index": 2,
+      "elapsed_ms": 2550,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Runtime unavailable. No current metrics.",
+        "workers": 0,
+        "overview": ""
+      },
+      "sha256": "e57b15a92014f8e26b15cf5862635c4b7a73be914eec62c587169d917da464b8"
+    },
+    {
+      "index": 3,
+      "elapsed_ms": 3579,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 1s. Live process snapshot.",
+        "workers": 4,
+        "overview": "58\nCore received\n56\nCore forwarding decisions\n72\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "e57b15a92014f8e26b15cf5862635c4b7a73be914eec62c587169d917da464b8"
+    },
+    {
+      "index": 4,
+      "elapsed_ms": 4553,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 1s. Live process snapshot.",
+        "workers": 4,
+        "overview": "58\nCore received\n56\nCore forwarding decisions\n72\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "07f0ad7d381e90499a75315be599a44a6015de5950c88dc8cb03b3903cf17116"
+    },
+    {
+      "index": 5,
+      "elapsed_ms": 5545,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 3s. Live process snapshot.",
+        "workers": 4,
+        "overview": "210\nCore received\n208\nCore forwarding decisions\n220\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n75.0\nCore decisions/s\n0.023\nTX IP Mbps"
+      },
+      "sha256": "07f0ad7d381e90499a75315be599a44a6015de5950c88dc8cb03b3903cf17116"
+    },
+    {
+      "index": 6,
+      "elapsed_ms": 6551,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 3s. Live process snapshot.",
+        "workers": 4,
+        "overview": "210\nCore received\n208\nCore forwarding decisions\n220\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n75.0\nCore decisions/s\n0.023\nTX IP Mbps"
+      },
+      "sha256": "a319c6ea62f0d1a1e78357f0a47ebc73c6ef9b0555875c494deb702d589c68f2"
+    },
+    {
+      "index": 7,
+      "elapsed_ms": 7567,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 5s. Live process snapshot.",
+        "workers": 4,
+        "overview": "367\nCore received\n363\nCore forwarding decisions\n367\nActual TUN writes\n0\nI/O + queue drops\n74.6\nTX packets/s\n76.6\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "a319c6ea62f0d1a1e78357f0a47ebc73c6ef9b0555875c494deb702d589c68f2"
+    },
+    {
+      "index": 8,
+      "elapsed_ms": 8567,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 5s. Live process snapshot.",
+        "workers": 4,
+        "overview": "367\nCore received\n363\nCore forwarding decisions\n367\nActual TUN writes\n0\nI/O + queue drops\n74.6\nTX packets/s\n76.6\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "ca9a42735851eacb8eb6c5faea40076261e992b87e6daf6ecc11708ee8145e26"
+    },
+    {
+      "index": 9,
+      "elapsed_ms": 9565,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 7s. Live process snapshot.",
+        "workers": 4,
+        "overview": "502\nCore received\n498\nCore forwarding decisions\n514\nActual TUN writes\n0\nI/O + queue drops\n73.7\nTX packets/s\n59.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "ca9a42735851eacb8eb6c5faea40076261e992b87e6daf6ecc11708ee8145e26"
+    },
+    {
+      "index": 10,
+      "elapsed_ms": 10590,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 7s. Live process snapshot.",
+        "workers": 4,
+        "overview": "502\nCore received\n498\nCore forwarding decisions\n514\nActual TUN writes\n0\nI/O + queue drops\n73.7\nTX packets/s\n59.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "b06f83789d268f814991e10b3f3a8a6ce8cfd2fc9393c76efa5b57c432aacd36"
+    },
+    {
+      "index": 11,
+      "elapsed_ms": 11564,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 9s. Live process snapshot.",
+        "workers": 4,
+        "overview": "659\nCore received\n655\nCore forwarding decisions\n662\nActual TUN writes\n0\nI/O + queue drops\n74.4\nTX packets/s\n79.5\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "ab0c62086f4488785c7b890e8285a49feab48cf79cac7e5bd19c1997740bfb44"
+    },
+    {
+      "index": 12,
+      "elapsed_ms": 12532,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 9s. Live process snapshot.",
+        "workers": 4,
+        "overview": "659\nCore received\n655\nCore forwarding decisions\n662\nActual TUN writes\n0\nI/O + queue drops\n74.4\nTX packets/s\n79.5\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "49c3602ca04c1cae9949fb0374817a0eee9541b84517916678c2a0dcf2e65a7f"
+    },
+    {
+      "index": 13,
+      "elapsed_ms": 13567,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 11s. Live process snapshot.",
+        "workers": 4,
+        "overview": "812\nCore received\n808\nCore forwarding decisions\n810\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n78.0\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "49c3602ca04c1cae9949fb0374817a0eee9541b84517916678c2a0dcf2e65a7f"
+    },
+    {
+      "index": 14,
+      "elapsed_ms": 14555,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 11s. Live process snapshot.",
+        "workers": 4,
+        "overview": "812\nCore received\n808\nCore forwarding decisions\n810\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n78.0\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "69ecc671b87508a7f7336d341c2cab50e29590ac3d072c94428d7d22e1d48038"
+    },
+    {
+      "index": 15,
+      "elapsed_ms": 15564,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 2.2s \u00b7 uptime: 12s. Live process snapshot.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n67.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "69ecc671b87508a7f7336d341c2cab50e29590ac3d072c94428d7d22e1d48038"
+    },
+    {
+      "index": 16,
+      "elapsed_ms": 16553,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 2.2s \u00b7 uptime: 12s. Live process snapshot.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n67.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "2a8b22f5d93f4364a91ca3fc8aa7d6ba07e196ab8a5d61004ecfd7bb2c64cc30"
+    },
+    {
+      "index": 17,
+      "elapsed_ms": 17569,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 4.2s \u00b7 uptime: 12s. Live process snapshot.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n67.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "2a8b22f5d93f4364a91ca3fc8aa7d6ba07e196ab8a5d61004ecfd7bb2c64cc30"
+    },
+    {
+      "index": 18,
+      "elapsed_ms": 18550,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 4.2s \u00b7 uptime: 12s. Live process snapshot.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n67.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "0a558d06c6f657cb55bc95a52d06cfd47d81317a262f1158702cbafb7daf0282"
+    },
+    {
+      "index": 19,
+      "elapsed_ms": 19568,
+      "state": {
+        "status": "STALE",
+        "age": "Snapshot age: 6.2s \u00b7 uptime: 12s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "0a558d06c6f657cb55bc95a52d06cfd47d81317a262f1158702cbafb7daf0282"
+    },
+    {
+      "index": 20,
+      "elapsed_ms": 20538,
+      "state": {
+        "status": "STALE",
+        "age": "Snapshot age: 6.2s \u00b7 uptime: 12s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "880\nCore received\n875\nCore forwarding decisions\n884\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "180bebe82c388cf84e4fd4c001074728f1449f029b4a9bc7e436760bf9db1321"
+    },
+    {
+      "index": 21,
+      "elapsed_ms": 21565,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 19s. Live process snapshot.",
+        "workers": 4,
+        "overview": "887\nCore received\n881\nCore forwarding decisions\n888\nActual TUN writes\n0\nI/O + queue drops\n0.6\nTX packets/s\n0.9\nCore decisions/s\n0.000\nTX IP Mbps"
+      },
+      "sha256": "180bebe82c388cf84e4fd4c001074728f1449f029b4a9bc7e436760bf9db1321"
+    },
+    {
+      "index": 22,
+      "elapsed_ms": 22547,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 19s. Live process snapshot.",
+        "workers": 4,
+        "overview": "887\nCore received\n881\nCore forwarding decisions\n888\nActual TUN writes\n0\nI/O + queue drops\n0.6\nTX packets/s\n0.9\nCore decisions/s\n0.000\nTX IP Mbps"
+      },
+      "sha256": "818e6a24eedd49b4d6098044f9b59c591a661ba3aaa8f969226c2aaf50fe8c04"
+    },
+    {
+      "index": 23,
+      "elapsed_ms": 23571,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 21s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1258\nCore received\n1252\nCore forwarding decisions\n1262\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n76.0\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "818e6a24eedd49b4d6098044f9b59c591a661ba3aaa8f969226c2aaf50fe8c04"
+    },
+    {
+      "index": 24,
+      "elapsed_ms": 24557,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 21s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1258\nCore received\n1252\nCore forwarding decisions\n1262\nActual TUN writes\n0\nI/O + queue drops\n74.0\nTX packets/s\n76.0\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "95ab5044d47439f3e54558dce289254c8edd4efe8cef776d920528b39388f361"
+    },
+    {
+      "index": 25,
+      "elapsed_ms": 25568,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 23s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1414\nCore received\n1408\nCore forwarding decisions\n1410\nActual TUN writes\n0\nI/O + queue drops\n73.5\nTX packets/s\n77.5\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "95ab5044d47439f3e54558dce289254c8edd4efe8cef776d920528b39388f361"
+    },
+    {
+      "index": 26,
+      "elapsed_ms": 26546,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 23s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1414\nCore received\n1408\nCore forwarding decisions\n1410\nActual TUN writes\n0\nI/O + queue drops\n73.5\nTX packets/s\n77.5\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "dc2cbf459f97da4511bc1bae1adce5bc2d75725a69d20232a62e89f71485aa80"
+    },
+    {
+      "index": 27,
+      "elapsed_ms": 27553,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 25s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1551\nCore received\n1545\nCore forwarding decisions\n1558\nActual TUN writes\n0\nI/O + queue drops\n73.7\nTX packets/s\n66.7\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "dc2cbf459f97da4511bc1bae1adce5bc2d75725a69d20232a62e89f71485aa80"
+    },
+    {
+      "index": 28,
+      "elapsed_ms": 28551,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 25s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1551\nCore received\n1545\nCore forwarding decisions\n1558\nActual TUN writes\n0\nI/O + queue drops\n73.7\nTX packets/s\n66.7\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "a3052b3a286d2724662a509ef1540f896c1ddb3225115620b229a4da19d35f4f"
+    },
+    {
+      "index": 29,
+      "elapsed_ms": 29568,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 27s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1705\nCore received\n1698\nCore forwarding decisions\n1706\nActual TUN writes\n0\nI/O + queue drops\n74.2\nTX packets/s\n80.2\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "a3052b3a286d2724662a509ef1540f896c1ddb3225115620b229a4da19d35f4f"
+    },
+    {
+      "index": 30,
+      "elapsed_ms": 30546,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 27s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1705\nCore received\n1698\nCore forwarding decisions\n1706\nActual TUN writes\n0\nI/O + queue drops\n74.2\nTX packets/s\n80.2\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "b91d6072e5161ca637a654e961524f90391ee618e126ec6bb2040d1e08aa669c"
+    },
+    {
+      "index": 31,
+      "elapsed_ms": 31570,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 29s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1858\nCore received\n1850\nCore forwarding decisions\n1856\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n77.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "b91d6072e5161ca637a654e961524f90391ee618e126ec6bb2040d1e08aa669c"
+    },
+    {
+      "index": 32,
+      "elapsed_ms": 32556,
+      "state": {
+        "status": "CURRENT",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 29s. Live process snapshot.",
+        "workers": 4,
+        "overview": "1858\nCore received\n1850\nCore forwarding decisions\n1856\nActual TUN writes\n0\nI/O + queue drops\n74.3\nTX packets/s\n77.3\nCore decisions/s\n0.024\nTX IP Mbps"
+      },
+      "sha256": "efbe781c26f4c4d07b59b8d3b671ace930f344ecb42ce1ca23114812a32257d5"
+    },
+    {
+      "index": 33,
+      "elapsed_ms": 33588,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "efbe781c26f4c4d07b59b8d3b671ace930f344ecb42ce1ca23114812a32257d5"
+    },
+    {
+      "index": 34,
+      "elapsed_ms": 34552,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 1.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "d15b136ce088b079fe20249b521420e3bdf36213d05639ca22cc5aaeb9f3b04d"
+    },
+    {
+      "index": 35,
+      "elapsed_ms": 35568,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 3.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "d15b136ce088b079fe20249b521420e3bdf36213d05639ca22cc5aaeb9f3b04d"
+    },
+    {
+      "index": 36,
+      "elapsed_ms": 36551,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 3.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "c7b684f16d2e52631fb14f6c80bcf07e4aeb8ded9dc9031a950ba063213597a7"
+    },
+    {
+      "index": 37,
+      "elapsed_ms": 37570,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 5.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "c7b684f16d2e52631fb14f6c80bcf07e4aeb8ded9dc9031a950ba063213597a7"
+    },
+    {
+      "index": 38,
+      "elapsed_ms": 38548,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 5.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "747bd42cf46fea37a562a300ff4f881070e6ad0245b8f9faf6271a7bd2452bb1"
+    },
+    {
+      "index": 39,
+      "elapsed_ms": 39569,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 7.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "747bd42cf46fea37a562a300ff4f881070e6ad0245b8f9faf6271a7bd2452bb1"
+    },
+    {
+      "index": 40,
+      "elapsed_ms": 40551,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 7.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "df23e0fbb3bae14971f17de8707f263648700fd4379cfe8eff403d66f5ec9158"
+    },
+    {
+      "index": 41,
+      "elapsed_ms": 41570,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 9.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "df23e0fbb3bae14971f17de8707f263648700fd4379cfe8eff403d66f5ec9158"
+    },
+    {
+      "index": 42,
+      "elapsed_ms": 42545,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Snapshot age: 9.2s \u00b7 uptime: 31s. Last observed data; not current.",
+        "workers": 4,
+        "overview": "2014\nCore received\n2006\nCore forwarding decisions\n2006\nActual TUN writes\n0\nI/O + queue drops\nUnavailable\nTX packets/s\nUnavailable\nCore decisions/s\nUnavailable\nTX IP Mbps"
+      },
+      "sha256": "5f79cad6db321da1598c8dfcc465b9e3a3b1ab965eac3565a02a25f7484c1473"
+    },
+    {
+      "index": 43,
+      "elapsed_ms": 43562,
+      "state": {
+        "status": "OFFLINE",
+        "age": "Runtime unavailable. No current metrics.",
+        "workers": 0,
+        "overview": ""
+      },
+      "sha256": "5f79cad6db321da1598c8dfcc465b9e3a3b1ab965eac3565a02a25f7484c1473"
+    }
+  ]
+}

@@ -182,11 +182,11 @@ def validate_parallel(d):
             if type(r[k]) not in (int,float) or not math.isfinite(r[k]) or r[k]<0: raise ValueError('invalid rate')
 
 
-def read_snapshot(path, guest=False, guest_root="router"):
+def read_snapshot(path, guest=False, guest_root="router", guest_live=False):
     if guest:
         # Fixed command and fixed task-owned path. Neither is derived from HTTP.
         result = subprocess.run([os.path.expanduser('~/.local/opt/lima-2.3.0/bin/limactl'),
-                                 'shell', 'router-lab', 'sudo', '-n', 'python3', '-B', guest_root + '/scripts/read_snapshot.py'],
+                                 'shell', 'router-lab', 'sudo', '-n', 'python3', '-B', guest_root + '/scripts/read_snapshot.py'] + (['--v2-live'] if guest_live else []),
                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, timeout=4, check=True)
         raw = result.stdout
     else:
@@ -223,7 +223,7 @@ class Handler(BaseHTTPRequestHandler):
             return self.respond(403, b'Forbidden', 'text/plain')
         if self.path == '/api/snapshot':
             try:
-                data = read_snapshot(self.server.snapshot, self.server.guest, getattr(self.server, 'guest_root', 'router'))
+                data = read_snapshot(self.server.snapshot, self.server.guest, getattr(self.server, 'guest_root', 'router'), getattr(self.server, 'guest_live', False))
             except (OSError, ValueError, KeyError, TypeError, OverflowError, AttributeError, RecursionError, subprocess.SubprocessError):
                 data = dict(state='offline', error='Runtime snapshot unavailable')
             return self.respond(200, json.dumps(data).encode(), 'application/json')
@@ -252,11 +252,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--snapshot', default='/tmp/udp-router-demo/snapshot.json')
     parser.add_argument('--guest', action='store_true')
+    parser.add_argument('--guest-live',action='store_true',help='fixed guest /tmp/udp-router-v2-live reader, CLI only')
     parser.add_argument('--guest-root', default='router')
     parser.add_argument('--port', type=int, default=8765)
     args = parser.parse_args()
+    if args.guest_live and not args.guest:parser.error('--guest-live requires --guest')
     server = HTTPServer(('127.0.0.1', args.port), Handler)
     server.snapshot, server.guest, server.guest_root = args.snapshot, args.guest, args.guest_root
+    server.guest_live=args.guest_live
     print(f'http://127.0.0.1:{server.server_port} — sensitive tuples, localhost read-only', flush=True)
     try:
         server.serve_forever()

@@ -71,10 +71,9 @@ fit in a full queue. Completions never block, so full queues cannot form a cycli
 wait. Join every worker even after one panics; report failure rather than silently
 running fewer shards. Queued inputs/outputs discarded at shutdown are explicit
 queue/shutdown drops. Final counters come from actual per-worker state, separate
-from dispatcher/queue/I/O drops; forwarded still means a core decision. No shared
-live tuples or invented dashboard snapshots: multicore snapshot export is deferred
-and `--snapshot` with workers>1 fails explicitly. Single-worker telemetry and
-security remain unchanged. Per-worker monitoring is the next roadmap stage.
+from dispatcher/queue/I/O drops; forwarded still means a core decision. No shared live tuples or invented dashboard snapshots: multicore schema 2
+exports bounded actual worker observations and queue ledgers. Reference schema 1
+remains supported. See [observability](OBSERVABILITY.md) for privacy and timing.
 
 AF_XDP is unimplemented: no AF_XDP-specific approved attach/test topology,
 L2/neighbor integration, ring/UMEM ownership implementation or measured comparison exists.
@@ -125,7 +124,8 @@ different capacity behavior, so old tiny-pool expected counters must not be
 silently reinterpreted. The per-shard portable tests cover that ownership model.
 The socket harness retains both endpoint TTL/tuple/payload checks, actual final
 counters, stop-path control and three repeats. Worker metrics do not fabricate
-private snapshots. Native Linux TUN execution, worker stress/expiry acceptance,
-per-thread profiler coverage and matched throughput/CPU/RSS/p99 are pending.
+private snapshots. Native Linux TUN and worker stress/expiry acceptance passed; matched
+throughput/CPU/RSS/p99 and aggregate profiles are retained in
+[multicore results](MULTICORE-RESULTS.md). Separate per-thread CPU remains unrun.
 The known reference optimization's p99 regressions remain prominent; additional
 queue/scheduling tails may be worse. Reject or revise based on those measurements.

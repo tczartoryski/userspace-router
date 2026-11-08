@@ -418,14 +418,29 @@ impl Pool {
                 }
             }
         }
+        // Cleanup must survive a poisoned observation mutex, including when
+        // invoked by Drop during unwinding. Never publish recovered bad metrics.
+        let mut metric = match self.monitor.as_ref().map(|m| m.output.lock()) {
+            Some(Ok(guard)) => Some(guard),
+            Some(Err(_)) => {
+                failed = true;
+                None
+            }
+            None => None,
+        };
         while self.outputs.try_recv().is_ok() {
             result.queue_drops = result.queue_drops.saturating_add(1);
-            if let Some(m) = &self.monitor {
-                m.output.lock().expect("output metric poisoned").discard();
+            if let Some(m) = metric.as_mut() {
+                if m.occupancy > 0 {
+                    m.discard();
+                } else {
+                    failed = true;
+                }
             }
         }
+        drop(metric);
         if failed {
-            Err("worker panicked; all workers joined")
+            Err("worker failure or poisoned telemetry; all workers joined")
         } else {
             Ok(result)
         }
@@ -824,5 +839,34 @@ mod dispatcher_failure_tests {
         })
         .unwrap();
         assert!(normal);
+    }
+}
+
+#[cfg(test)]
+mod poison_review_tests {
+    use super::*;
+    #[test]
+    fn poisoned_output_metrics_fail_closed_without_drop_double_panic() {
+        let config = Config {
+            external: "198.51.100.1".parse().unwrap(),
+            ports: (40000, 40007),
+            max_flows: 4,
+            idle_seconds: 2,
+            mtu: 1500,
+            routes: vec![crate::Route::new("0.0.0.0".parse().unwrap(), 0, Side::Outside).unwrap()],
+        };
+        let mut pool =
+            Pool::observed(config, 4, 1, Instant::now(), Arc::new(|| {}), true, 0).unwrap();
+        let metric = pool.monitor.as_ref().unwrap().output.clone();
+        assert!(thread::spawn(move || {
+            let _guard = metric.lock().unwrap();
+            panic!("injected metric poison");
+        })
+        .join()
+        .is_err());
+        let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| pool.shutdown()));
+        assert!(result.unwrap().is_err());
+        assert!(pool.workers.iter().all(|w| w.join.is_none()));
+        assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| drop(pool))).is_ok());
     }
 }

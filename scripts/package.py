@@ -27,6 +27,22 @@ FILES.append('docs/benchmarks/optimization-comparison.md')
 FILES.extend(['docs/benchmarks/e2e-after/e2e-128-1.json', 'docs/benchmarks/e2e-after/e2e-128-1.md', 'docs/benchmarks/e2e-after/e2e-128-512.json', 'docs/benchmarks/e2e-after/e2e-128-512.md', 'docs/benchmarks/e2e-after/e2e-128-64.json', 'docs/benchmarks/e2e-after/e2e-128-64.md', 'docs/benchmarks/e2e-after/e2e-1400-1.json', 'docs/benchmarks/e2e-after/e2e-1400-1.md', 'docs/benchmarks/e2e-after/e2e-1400-512.json', 'docs/benchmarks/e2e-after/e2e-1400-512.md', 'docs/benchmarks/e2e-after/e2e-1400-64.json', 'docs/benchmarks/e2e-after/e2e-1400-64.md', 'docs/benchmarks/e2e-after/e2e-512-1.json', 'docs/benchmarks/e2e-after/e2e-512-1.md', 'docs/benchmarks/e2e-after/e2e-512-512.json', 'docs/benchmarks/e2e-after/e2e-512-512.md', 'docs/benchmarks/e2e-after/e2e-512-64.json', 'docs/benchmarks/e2e-after/e2e-512-64.md', 'docs/benchmarks/e2e-after/e2e-64-1.json', 'docs/benchmarks/e2e-after/e2e-64-1.md', 'docs/benchmarks/e2e-after/e2e-64-512.json', 'docs/benchmarks/e2e-after/e2e-64-512.md', 'docs/benchmarks/e2e-after/e2e-64-64.json', 'docs/benchmarks/e2e-after/e2e-64-64.md', 'docs/benchmarks/e2e-after/profile-perf.json', 'docs/benchmarks/e2e-after/profile-perf.md', 'docs/benchmarks/e2e-after/profile-strace.json', 'docs/benchmarks/e2e-after/profile-strace.md', 'docs/benchmarks/comparison-long/after-128-512.json', 'docs/benchmarks/comparison-long/after-128-512.md', 'docs/benchmarks/comparison-long/after-1400-512.json', 'docs/benchmarks/comparison-long/after-1400-512.md', 'docs/benchmarks/comparison-long/after-512-512.json', 'docs/benchmarks/comparison-long/after-512-512.md', 'docs/benchmarks/comparison-long/after-64-512.json', 'docs/benchmarks/comparison-long/after-64-512.md', 'docs/benchmarks/comparison-long/before-128-512.json', 'docs/benchmarks/comparison-long/before-128-512.md', 'docs/benchmarks/comparison-long/before-1400-512.json', 'docs/benchmarks/comparison-long/before-1400-512.md', 'docs/benchmarks/comparison-long/before-512-512.json', 'docs/benchmarks/comparison-long/before-512-512.md', 'docs/benchmarks/comparison-long/before-64-512.json', 'docs/benchmarks/comparison-long/before-64-512.md', 'docs/benchmarks/after-linux.json', 'docs/benchmarks/after-linux.md'])
 FILES.extend(['docs/benchmarks/e2e-baseline/e2e-64-1.json', 'docs/benchmarks/e2e-baseline/e2e-64-1.md', 'docs/benchmarks/e2e-baseline/e2e-64-64.json', 'docs/benchmarks/e2e-baseline/e2e-64-64.md', 'docs/benchmarks/e2e-baseline/e2e-64-512.json', 'docs/benchmarks/e2e-baseline/e2e-64-512.md', 'docs/benchmarks/e2e-baseline/e2e-128-1.json', 'docs/benchmarks/e2e-baseline/e2e-128-1.md', 'docs/benchmarks/e2e-baseline/e2e-128-64.json', 'docs/benchmarks/e2e-baseline/e2e-128-64.md', 'docs/benchmarks/e2e-baseline/e2e-128-512.json', 'docs/benchmarks/e2e-baseline/e2e-128-512.md', 'docs/benchmarks/e2e-baseline/e2e-512-1.json', 'docs/benchmarks/e2e-baseline/e2e-512-1.md', 'docs/benchmarks/e2e-baseline/e2e-512-64.json', 'docs/benchmarks/e2e-baseline/e2e-512-64.md', 'docs/benchmarks/e2e-baseline/e2e-512-512.json', 'docs/benchmarks/e2e-baseline/e2e-512-512.md', 'docs/benchmarks/e2e-baseline/e2e-1400-1.json', 'docs/benchmarks/e2e-baseline/e2e-1400-1.md', 'docs/benchmarks/e2e-baseline/e2e-1400-64.json', 'docs/benchmarks/e2e-baseline/e2e-1400-64.md', 'docs/benchmarks/e2e-baseline/e2e-1400-512.json', 'docs/benchmarks/e2e-baseline/e2e-1400-512.md', 'docs/benchmarks/e2e-baseline/profile-perf.json', 'docs/benchmarks/e2e-baseline/profile-perf.md', 'docs/benchmarks/e2e-baseline/profile-strace.json', 'docs/benchmarks/e2e-baseline/profile-strace.md'])
 FILES.extend([
+    'scripts/report_v2.py',
+    'scripts/live_v2_demo.py',
+    'scripts/test_report_v2.py',
+    'scripts/test_live_v2_demo.py',
+    'docs/FINAL-REVIEW.md',
+    'docs/LIVE-V2-DEMO.md',
+    'docs/V2-ENGINEERING-REPORT.md',
+    'docs/V2-ALL-DATA.md',
+    'docs/v2-all-e2e.svg',
+    'docs/v2-expiry-rate.svg',
+    'docs/v2-expiry-tail.svg',
+    'docs/v2-multicore-rate.svg',
+    'docs/v2-multicore-tail.svg',
+    'docs/v2-monitoring-rate.svg',
+    'docs/v2-monitoring-tail.svg',
+    'docs/v2-architecture.svg',
     'src/observability.rs',
     'scripts/worker_acceptance.py',
     'scripts/test_worker_acceptance.py',
@@ -87,6 +103,14 @@ FILES.extend(['docs/NAT-STORY.md', 'docs/qa/nat-story/observations.json',
               'docs/qa/nat-story/capture.json', 'docs/qa/nat-story/nat-story.mp4',
               'docs/qa/nat-story/poster.png'])
 BINARY_FILES = BINARY_FILES | {'docs/qa/nat-story/nat-story.mp4', 'docs/qa/nat-story/poster.png'}
+
+
+# Successful reviewed live capture only: exact fixed frame inventory, never a glob.
+LIVE_FILES = ['docs/qa/v2-live/capture.json', 'docs/qa/v2-live/observations.json',
+              'docs/qa/v2-live/live-v2.mp4']
+LIVE_FILES.extend(f'docs/qa/v2-live/frames/{index:04d}.png' for index in range(44))
+FILES.extend(LIVE_FILES)
+BINARY_FILES = BINARY_FILES | {name for name in LIVE_FILES if name.endswith(('.png', '.mp4'))}
 
 
 def sanitize_architecture(text):

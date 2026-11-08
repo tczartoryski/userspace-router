@@ -4,7 +4,7 @@ This phase implements a bounded real UDP harness and optional software profiling
 The coordinator subsequently completed 144 baseline E2E experiments and three
 runs each of software perf and strace, with zero measured payload loss, before
 core edits. The [optimization record](OPTIMIZATION-RESULTS.md) identifies that
-baseline and the now-pending after measurements. The Linux adapter, old tests
+baseline and retained after measurements. The Linux adapter, old tests
 and existing macOS/Linux MICRO baseline artifacts remain unchanged. The earlier
 `process` MICRO timings cover the entire public forwarding path, not pure NAT
 lookup. No optimization is authorized by source rationale alone.
@@ -243,4 +243,5 @@ record actual requested worker/queue configuration and keep repeat groups separa
 Four workers oversubscribe the approved 2-vCPU guest. [Actual multicore results](MULTICORE-RESULTS.md) report throughput and p99
 regressions. Run matched cells and examine p99, losses, CPU and RSS, not
 only PPS; existing 64-byte and 512-byte p99 regressions remain unresolved.
-Parallel snapshots and AF_XDP remain unimplemented and explicitly disclosed.
+Parallel snapshots are implemented; see [observability](OBSERVABILITY.md) and
+[measured monitoring results](MONITORING-RESULTS.md). AF_XDP remains unimplemented.

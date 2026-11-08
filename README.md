@@ -87,7 +87,7 @@ cargo test --locked --offline
 python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-The current checks have **30 Rust and 58 Python tests**, plus a controlled-clock
+The current checks have **31 Rust and 66 Python tests**, plus a controlled-clock
 JavaScript replay test. Documentation checks cover links, SVG safety and packaging preservation. Portable tests do not
 exercise Linux TUN I/O. No Cargo or Python package dependencies are required.
 
@@ -120,6 +120,39 @@ configure Lima and is not a general macOS dataplane setup command.
 On that configured host, the command copies allowlisted source, starts real guest
 traffic and serves the dashboard at <http://127.0.0.1:8765>. Ctrl-C or SIGTERM
 cleans up its processes/staging and stops the VM.
+
+## Router v2: measured engineering outcome
+
+Reference **one-worker mode remains the default**. The expiry change improved
+matched completed-echo throughput by 10.23–19.76%, with worse p99 RTT at 64 and
+512 bytes. Opt-in multicore is an ownership and observability demonstrator:
+measured throughput fell 15.68–24.69% and median p99 worsened. Four workers
+oversubscribe the two-vCPU lab. No scalable-performance or production claim.
+
+[Engineering report and full raw-data inventory](docs/V2-ENGINEERING-REPORT.md) ·
+[Focused final review](docs/FINAL-REVIEW.md) · [Progress and remaining gates](docs/AGENT_PROGRESS.md)
+
+![Matched expiry rates with all repeats](docs/v2-expiry-rate.svg)
+![Tail regressions remain visible](docs/v2-expiry-tail.svg)
+![Dispatcher and worker ownership](docs/v2-architecture.svg)
+
+The v2 dashboard exposes actual worker/queue/TX state through private versioned
+snapshots and optional bounded tuple-free decisions. This [actual retained
+stopped-state desktop capture](docs/qa/v2-monitoring/desktop.png) is **not live
+traffic footage**; [mobile capture](docs/qa/v2-monitoring/mobile.png) and
+[measured monitoring overhead](docs/MONITORING-RESULTS.md) retain their scope.
+[Verified live capture and reproduction](docs/LIVE-V2-DEMO.md) retain genuine
+current → stale → recovered → stopped states from actual UDP forwarding.
+
+[![Genuine sampled live v2 dashboard poster, frame 3](docs/qa/v2-live/frames/0003.png)](docs/qa/v2-live/live-v2.mp4)
+
+[Download sampled live video](https://raw.githubusercontent.com/tczartoryski/userspace-router/feat/router-v2/docs/qa/v2-live/live-v2.mp4)
+(inline playback is not guaranteed; feature-branch URL changes with the branch).
+44 genuine stills targeted at 1 Hz, encoded at 1 fps for 44 seconds, no audio;
+not continuous full-frame-rate footage. Chapters: current 3.579 s, stale 19.568 s,
+recovery 21.565 s, stopped/offline 33.588 s. All source frames and timestamps are
+retained. One resume request remained outstanding at shutdown; this is not a
+zero-loss whole-movie claim. See the linked evidence for exact phase counts.
 
 ## Scope and publication
 
