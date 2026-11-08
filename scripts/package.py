@@ -18,7 +18,12 @@ RENDERED_FILES.extend(f'docs/qa/rendered/frames/{index:04d}.png' for index in ra
 BINARY_FILES = frozenset(name for name in RENDERED_FILES if not name.endswith('.json'))
 FILES.extend(RENDERED_FILES)
 # Reviewed source/UI allowlist. Generated scenario JSON requires separate review.
+FILES.extend(['docs/benchmarks/e2e-baseline/e2e-64-1.json', 'docs/benchmarks/e2e-baseline/e2e-64-1.md', 'docs/benchmarks/e2e-baseline/e2e-64-64.json', 'docs/benchmarks/e2e-baseline/e2e-64-64.md', 'docs/benchmarks/e2e-baseline/e2e-64-512.json', 'docs/benchmarks/e2e-baseline/e2e-64-512.md', 'docs/benchmarks/e2e-baseline/e2e-128-1.json', 'docs/benchmarks/e2e-baseline/e2e-128-1.md', 'docs/benchmarks/e2e-baseline/e2e-128-64.json', 'docs/benchmarks/e2e-baseline/e2e-128-64.md', 'docs/benchmarks/e2e-baseline/e2e-128-512.json', 'docs/benchmarks/e2e-baseline/e2e-128-512.md', 'docs/benchmarks/e2e-baseline/e2e-512-1.json', 'docs/benchmarks/e2e-baseline/e2e-512-1.md', 'docs/benchmarks/e2e-baseline/e2e-512-64.json', 'docs/benchmarks/e2e-baseline/e2e-512-64.md', 'docs/benchmarks/e2e-baseline/e2e-512-512.json', 'docs/benchmarks/e2e-baseline/e2e-512-512.md', 'docs/benchmarks/e2e-baseline/e2e-1400-1.json', 'docs/benchmarks/e2e-baseline/e2e-1400-1.md', 'docs/benchmarks/e2e-baseline/e2e-1400-64.json', 'docs/benchmarks/e2e-baseline/e2e-1400-64.md', 'docs/benchmarks/e2e-baseline/e2e-1400-512.json', 'docs/benchmarks/e2e-baseline/e2e-1400-512.md', 'docs/benchmarks/e2e-baseline/profile-perf.json', 'docs/benchmarks/e2e-baseline/profile-perf.md', 'docs/benchmarks/e2e-baseline/profile-strace.json', 'docs/benchmarks/e2e-baseline/profile-strace.md'])
 FILES.extend([
+    'scripts/e2e_benchmark.py',
+    'scripts/linux-benchmark.sh',
+    'scripts/test_e2e_benchmark.py',
+    'docs/BENCHMARK-METHODOLOGY.md',
     'examples/core_bench.rs',
     'scripts/benchmark.py',
     'scripts/test_benchmark.py',
