@@ -17,8 +17,56 @@ RENDERED_FILES = ['docs/qa/rendered/' + name for name in
 RENDERED_FILES.extend(f'docs/qa/rendered/frames/{index:04d}.png' for index in range(12))
 BINARY_FILES = frozenset(name for name in RENDERED_FILES if not name.endswith('.json'))
 FILES.extend(RENDERED_FILES)
+FILES.append('docs/MULTICORE-RESULTS.md')
+FILES.extend(['docs/benchmarks/multicore/workers-1-perf.json', 'docs/benchmarks/multicore/workers-1-size-1400.json', 'docs/benchmarks/multicore/workers-1-size-64.json', 'docs/benchmarks/multicore/workers-2-perf.json', 'docs/benchmarks/multicore/workers-2-size-1400.json', 'docs/benchmarks/multicore/workers-2-size-64.json', 'docs/benchmarks/multicore/workers-4-perf.json', 'docs/benchmarks/multicore/workers-4-size-1400.json', 'docs/benchmarks/multicore/workers-4-size-64.json'])
+FILES.extend(['docs/MONITORING-RESULTS.md', 'docs/benchmarks/monitoring/router-worker-acceptance.json', 'docs/benchmarks/monitoring/workers-1-monitoring-off.json', 'docs/benchmarks/monitoring/workers-1-monitoring-on.json', 'docs/benchmarks/monitoring/workers-2-monitoring-off.json', 'docs/benchmarks/monitoring/workers-2-monitoring-on.json', 'docs/benchmarks/monitoring/workers-2-monitoring-sampled.json', 'docs/benchmarks/monitoring/workers-4-monitoring-off.json', 'docs/benchmarks/monitoring/workers-4-monitoring-on.json', 'docs/benchmarks/monitoring/workers-4-monitoring-sampled.json', 'docs/qa/v2-monitoring/desktop.png', 'docs/qa/v2-monitoring/mobile.png'])
+BINARY_FILES = BINARY_FILES | {'docs/qa/v2-monitoring/desktop.png', 'docs/qa/v2-monitoring/mobile.png'}
 # Reviewed source/UI allowlist. Generated scenario JSON requires separate review.
+FILES.append('docs/benchmarks/optimization-comparison.json')
+FILES.append('docs/benchmarks/optimization-comparison.md')
+FILES.extend(['docs/benchmarks/e2e-after/e2e-128-1.json', 'docs/benchmarks/e2e-after/e2e-128-1.md', 'docs/benchmarks/e2e-after/e2e-128-512.json', 'docs/benchmarks/e2e-after/e2e-128-512.md', 'docs/benchmarks/e2e-after/e2e-128-64.json', 'docs/benchmarks/e2e-after/e2e-128-64.md', 'docs/benchmarks/e2e-after/e2e-1400-1.json', 'docs/benchmarks/e2e-after/e2e-1400-1.md', 'docs/benchmarks/e2e-after/e2e-1400-512.json', 'docs/benchmarks/e2e-after/e2e-1400-512.md', 'docs/benchmarks/e2e-after/e2e-1400-64.json', 'docs/benchmarks/e2e-after/e2e-1400-64.md', 'docs/benchmarks/e2e-after/e2e-512-1.json', 'docs/benchmarks/e2e-after/e2e-512-1.md', 'docs/benchmarks/e2e-after/e2e-512-512.json', 'docs/benchmarks/e2e-after/e2e-512-512.md', 'docs/benchmarks/e2e-after/e2e-512-64.json', 'docs/benchmarks/e2e-after/e2e-512-64.md', 'docs/benchmarks/e2e-after/e2e-64-1.json', 'docs/benchmarks/e2e-after/e2e-64-1.md', 'docs/benchmarks/e2e-after/e2e-64-512.json', 'docs/benchmarks/e2e-after/e2e-64-512.md', 'docs/benchmarks/e2e-after/e2e-64-64.json', 'docs/benchmarks/e2e-after/e2e-64-64.md', 'docs/benchmarks/e2e-after/profile-perf.json', 'docs/benchmarks/e2e-after/profile-perf.md', 'docs/benchmarks/e2e-after/profile-strace.json', 'docs/benchmarks/e2e-after/profile-strace.md', 'docs/benchmarks/comparison-long/after-128-512.json', 'docs/benchmarks/comparison-long/after-128-512.md', 'docs/benchmarks/comparison-long/after-1400-512.json', 'docs/benchmarks/comparison-long/after-1400-512.md', 'docs/benchmarks/comparison-long/after-512-512.json', 'docs/benchmarks/comparison-long/after-512-512.md', 'docs/benchmarks/comparison-long/after-64-512.json', 'docs/benchmarks/comparison-long/after-64-512.md', 'docs/benchmarks/comparison-long/before-128-512.json', 'docs/benchmarks/comparison-long/before-128-512.md', 'docs/benchmarks/comparison-long/before-1400-512.json', 'docs/benchmarks/comparison-long/before-1400-512.md', 'docs/benchmarks/comparison-long/before-512-512.json', 'docs/benchmarks/comparison-long/before-512-512.md', 'docs/benchmarks/comparison-long/before-64-512.json', 'docs/benchmarks/comparison-long/before-64-512.md', 'docs/benchmarks/after-linux.json', 'docs/benchmarks/after-linux.md'])
+FILES.extend(['docs/benchmarks/e2e-baseline/e2e-64-1.json', 'docs/benchmarks/e2e-baseline/e2e-64-1.md', 'docs/benchmarks/e2e-baseline/e2e-64-64.json', 'docs/benchmarks/e2e-baseline/e2e-64-64.md', 'docs/benchmarks/e2e-baseline/e2e-64-512.json', 'docs/benchmarks/e2e-baseline/e2e-64-512.md', 'docs/benchmarks/e2e-baseline/e2e-128-1.json', 'docs/benchmarks/e2e-baseline/e2e-128-1.md', 'docs/benchmarks/e2e-baseline/e2e-128-64.json', 'docs/benchmarks/e2e-baseline/e2e-128-64.md', 'docs/benchmarks/e2e-baseline/e2e-128-512.json', 'docs/benchmarks/e2e-baseline/e2e-128-512.md', 'docs/benchmarks/e2e-baseline/e2e-512-1.json', 'docs/benchmarks/e2e-baseline/e2e-512-1.md', 'docs/benchmarks/e2e-baseline/e2e-512-64.json', 'docs/benchmarks/e2e-baseline/e2e-512-64.md', 'docs/benchmarks/e2e-baseline/e2e-512-512.json', 'docs/benchmarks/e2e-baseline/e2e-512-512.md', 'docs/benchmarks/e2e-baseline/e2e-1400-1.json', 'docs/benchmarks/e2e-baseline/e2e-1400-1.md', 'docs/benchmarks/e2e-baseline/e2e-1400-64.json', 'docs/benchmarks/e2e-baseline/e2e-1400-64.md', 'docs/benchmarks/e2e-baseline/e2e-1400-512.json', 'docs/benchmarks/e2e-baseline/e2e-1400-512.md', 'docs/benchmarks/e2e-baseline/profile-perf.json', 'docs/benchmarks/e2e-baseline/profile-perf.md', 'docs/benchmarks/e2e-baseline/profile-strace.json', 'docs/benchmarks/e2e-baseline/profile-strace.md'])
 FILES.extend([
+    'scripts/report_v2.py',
+    'scripts/live_v2_demo.py',
+    'scripts/test_report_v2.py',
+    'scripts/test_live_v2_demo.py',
+    'docs/FINAL-REVIEW.md',
+    'docs/LIVE-V2-DEMO.md',
+    'docs/V2-ENGINEERING-REPORT.md',
+    'docs/V2-ALL-DATA.md',
+    'docs/v2-all-e2e.svg',
+    'docs/v2-expiry-rate.svg',
+    'docs/v2-expiry-tail.svg',
+    'docs/v2-multicore-rate.svg',
+    'docs/v2-multicore-tail.svg',
+    'docs/v2-monitoring-rate.svg',
+    'docs/v2-monitoring-tail.svg',
+    'docs/v2-architecture.svg',
+    'src/observability.rs',
+    'scripts/worker_acceptance.py',
+    'scripts/test_worker_acceptance.py',
+    'scripts/test_observability.py',
+    'scripts/test_dashboard_state.cjs',
+    'docs/OBSERVABILITY.md',
+    'docs/RESILIENCE.md',
+    'src/packet_io.rs',
+    'src/parallel.rs',
+    'docs/MULTICORE-DESIGN.md',
+    'scripts/e2e_benchmark.py',
+    'scripts/linux-benchmark.sh',
+    'scripts/test_e2e_benchmark.py',
+    'docs/BENCHMARK-METHODOLOGY.md',
+    'docs/OPTIMIZATION-RESULTS.md',
+    'docs/benchmarks/baseline-linux.json',
+    'docs/benchmarks/baseline-linux.md',
+    'examples/core_bench.rs',
+    'scripts/benchmark.py',
+    'scripts/test_benchmark.py',
+    'docs/AGENT_PROGRESS.md',
+    'docs/PERFORMANCE-BASELINE.md',
+    'docs/benchmarks/baseline-macos.json',
+    'docs/benchmarks/baseline-macos.md', 'docs/benchmarks/linux-integration-baseline.json',
     'dashboard/app.js',
     'dashboard/index.html',
     'dashboard/style.css',
@@ -55,6 +103,18 @@ FILES.extend(['docs/NAT-STORY.md', 'docs/qa/nat-story/observations.json',
               'docs/qa/nat-story/capture.json', 'docs/qa/nat-story/nat-story.mp4',
               'docs/qa/nat-story/poster.png'])
 BINARY_FILES = BINARY_FILES | {'docs/qa/nat-story/nat-story.mp4', 'docs/qa/nat-story/poster.png'}
+
+
+# Successful reviewed live capture only: exact fixed frame inventory, never a glob.
+LIVE_FILES = ['docs/qa/v2-live/capture.json', 'docs/qa/v2-live/observations.json',
+              'docs/qa/v2-live/live-v2.mp4']
+LIVE_FILES.extend(f'docs/qa/v2-live/frames/{index:04d}.png' for index in range(44))
+FILES.extend(LIVE_FILES)
+BINARY_FILES = BINARY_FILES | {name for name in LIVE_FILES if name.endswith(('.png', '.mp4'))}
+
+
+FILES.extend(['docs/V2-PUBLICATION-AUDIT.md', 'docs/qa/v2-publication/desktop.png', 'docs/qa/v2-publication/mobile.png'])
+BINARY_FILES = BINARY_FILES | {'docs/qa/v2-publication/desktop.png', 'docs/qa/v2-publication/mobile.png'}
 
 
 def sanitize_architecture(text):

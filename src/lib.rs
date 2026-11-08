@@ -1,4 +1,7 @@
 //! Portable IPv4/UDP forwarding and endpoint-dependent SNAT. No socket or OS I/O.
+pub mod observability;
+pub mod packet_io;
+pub mod parallel;
 use std::collections::BTreeMap;
 use std::net::Ipv4Addr;
 
@@ -200,6 +203,12 @@ impl Router {
     pub fn expire(&mut self, now: u64) -> Result<(), DropReason> {
         if now < self.last_time {
             return Err(DropReason::Clock);
+        }
+        // At an unchanged integer second, survivors cannot newly expire and
+        // inserted/refreshed flows have age zero (idle_seconds is at least one).
+        // The initial last_time == 0 is safe because the table starts empty.
+        if now == self.last_time {
+            return Ok(());
         }
         self.last_time = now;
         let before = self.flows.len();

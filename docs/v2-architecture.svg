@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="540" viewBox="0 0 1200 540" role="img" aria-labelledby="title desc">
+<title id="title">Opt-in worker ownership and reverse routing</title><desc id="desc">Reference one worker stays default. Dispatcher owns both TUN files. Inside socket hash selects a bounded worker input. Replies select the owner by disjoint external destination port; the owner validates remote tuples before refresh. Workers own private NAT; bounded shared completions return to dispatcher transmit.</desc>
+<rect width="1200" height="540" fill="#101f26"/><g font-family="system-ui,sans-serif" fill="#edf8f5">
+<text x="25" y="35" font-size="22">Safe ownership demonstrator; measured multicore is slower</text>
+<text x="25" y="62" font-size="15">Reference workers=1 default · opt-in 4 workers oversubscribe approved 2-vCPU guest</text>
+<rect x="25" y="180" width="170" height="160" fill="#284050"/><text x="40" y="215">Inside / outside TUN</text><text x="40" y="245">Precreated, NO_PI</text><text x="40" y="275">No network setup</text>
+<rect x="230" y="125" width="330" height="290" fill="#284050"/><text x="245" y="160">Dispatcher owns both device FDs</text><text x="245" y="195">Validate → internal socket hash</text><text x="245" y="230">Reply dst port → sole shard owner</text><text x="245" y="265">Bounded try_send input queues</text><text x="245" y="300">Bounded completion queue → TX</text><text x="245" y="335">WouldBlock / full queue: counted drop</text><text x="245" y="370">Shutdown flag → join every worker</text>
+<path d="M195 260H230M560 180H630M560 260H630M560 340H630M560 400H630" stroke="#5eead4" stroke-width="3" fill="none"/>
+<rect x="635" y="95" width="530" height="80" fill="#284050"/>
+<text x="650" y="120">Worker 0: private Router / disjoint range P0 and capacity C0</text>
+<text x="650" y="150">Remote tuple filter before refresh · monotonic expiry · no hot NAT lock</text>
+<rect x="635" y="190" width="530" height="80" fill="#284050"/>
+<text x="650" y="215">Worker 1: private Router / disjoint range P1 and capacity C1</text>
+<text x="650" y="245">Remote tuple filter before refresh · monotonic expiry · no hot NAT lock</text>
+<rect x="635" y="285" width="530" height="80" fill="#284050"/>
+<text x="650" y="310">Worker 2: private Router / disjoint range P2 and capacity C2</text>
+<text x="650" y="340">Remote tuple filter before refresh · monotonic expiry · no hot NAT lock</text>
+<rect x="635" y="380" width="530" height="80" fill="#284050"/>
+<text x="650" y="405">Worker 3: private Router / disjoint range P3 and capacity C3</text>
+<text x="650" y="435">Remote tuple filter before refresh · monotonic expiry · no hot NAT lock</text>
+<text x="25" y="475">Queue occupancy, shutdown discards, actual TX and optional bounded tuple-free samples → private snapshots</text>
+<text x="25" y="510">No shared NAT allocation · no migration · no AF_XDP / zero-copy / scaling claim</text></g></svg>

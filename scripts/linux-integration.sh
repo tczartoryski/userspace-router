@@ -15,6 +15,18 @@ for tool in ip python3 sysctl; do command -v "$tool" >/dev/null || { echo "Missi
 project=$(cd -- "$(dirname -- "$0")/.." && pwd)
 binary=${UDP_ROUTER_BIN:-$project/target/debug/udp-router}
 [[ -x $binary ]] || { echo "Build the Linux binary first: $binary" >&2; exit 2; }
+# Opt-in worker acceptance uses the bounded real socket harness. The historical
+# tiny-pool exhaustion fixtures remain the workers=1 reference suite.
+case ${UDP_ROUTER_WORKERS:-1} in
+  1) ;;
+  2|4)
+    exec python3 -B "$project/scripts/e2e_benchmark.py" "$binary" \
+      --backend user --mode warm --size 64 --flows 64 --count 1500 --repeats 3 \
+      --workers "$UDP_ROUTER_WORKERS" --metadata 'isolated Linux worker integration 2vCPU lab' \
+      --output "${UDP_ROUTER_WORKER_OUTPUT:-/tmp/router-v2-worker-integration.json}"
+    ;;
+  *) echo 'UDP_ROUTER_WORKERS must be 1, 2 or 4' >&2; exit 2 ;;
+esac
 artifact=$(mktemp -d "${TMPDIR:-/tmp}/udp-router-evidence.XXXXXXXX")
 tag="ur-$$-${RANDOM}"
 client="$tag-c"; server="$tag-s"; router="$tag-r"
