@@ -31,7 +31,7 @@ allowed delivery, and stopped-router timeout followed by fresh-process recovery.
 The approved guest's owned namespaces/helpers/staging were removed and the VM
 was verified stopped. No host network configuration or core dataplane changed.
 
-The [captioned movie](qa/nat-story/nat-story.mp4) is a **57.08-second, 25 FPS,
+The [captioned movie](https://raw.githubusercontent.com/tczartoryski/userspace-router/cc95f60414a7aab467db7678ab3f7b32bfd84014/docs/qa/nat-story/nat-story.mp4) is a **57.08-second, 25 FPS,
 1440×900 H.264 MP4**: 1,427 continuous browser-recording frames, all independently
 decoded after unchanged-cadence conversion. Its four chapters contain 13
 editorially timed substages (52 seconds), based exclusively on the reviewed

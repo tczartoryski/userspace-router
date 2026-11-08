@@ -6,8 +6,10 @@ was reviewed and independently rechecked with `nat_story.py verify` during this
 UI revision. The VM is stopped and namespaces/helpers were removed, as reported
 by the coordinator. The collector is unchanged. Portable test fixtures remain
 separate from real acceptance evidence. The reviewed [observations](qa/nat-story/observations.json),
-[capture record](qa/nat-story/capture.json), and [explanatory MP4](qa/nat-story/nat-story.mp4)
-are bundled after coordinator verification and privacy review.
+[capture record](qa/nat-story/capture.json), and [explanatory MP4](https://raw.githubusercontent.com/tczartoryski/userspace-router/cc95f60414a7aab467db7678ab3f7b32bfd84014/docs/qa/nat-story/nat-story.mp4)
+are bundled after coordinator verification and privacy review. The direct MP4
+link downloads the verified file; GitHub does not preview this 16.4 MB source
+asset inline. No hosted live demo or inline player is implied.
 
 Use only the already approved `router-lab` Lima guest, with `mounts: []`,
 `networks: []`, and ignored forwards. Do not create/reconfigure a VM, install

@@ -1,7 +1,7 @@
 # Historical sampled dashboard video
 
 For the newer, explanatory request/reply, shared-address, policy and recovery
-demo, see [the NAT story](NAT-STORY.md) and its [continuous captioned movie](qa/nat-story/nat-story.mp4).
+demo, see [the NAT story](NAT-STORY.md) and its [continuous captioned movie](https://raw.githubusercontent.com/tczartoryski/userspace-router/cc95f60414a7aab467db7678ab3f7b32bfd84014/docs/qa/nat-story/nat-story.mp4).
 The sampled counter recording below is retained as historical dashboard QA.
 
 Rendered QA PASS as of November 7, 2026. The coordinator inspected genuine

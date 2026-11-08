@@ -21,9 +21,9 @@ UDP endpoints and TUN boundaries.
 
 ## Watch the NAT story
 
-[![Recorded real Linux UDP observations: request SNAT and reply reverse translation](docs/qa/nat-story/poster.png)](docs/qa/nat-story/nat-story.mp4)
+[![Recorded real Linux UDP observations: request SNAT and reply reverse translation](docs/qa/nat-story/poster.png)](https://raw.githubusercontent.com/tczartoryski/userspace-router/cc95f60414a7aab467db7678ab3f7b32bfd84014/docs/qa/nat-story/nat-story.mp4)
 
-**[Watch the explanatory demo →](docs/qa/nat-story/nat-story.mp4)** · [Evidence and reproduction](docs/NAT-STORY.md)
+**[Download the explanatory MP4 →](https://raw.githubusercontent.com/tczartoryski/userspace-router/cc95f60414a7aab467db7678ab3f7b32bfd84014/docs/qa/nat-story/nat-story.mp4)** · [Evidence and reproduction](docs/NAT-STORY.md)
 
 Follow a real request and reply through translation; watch two clients share one
 external address, allowed traffic pass while policy rejects a packet, and the
