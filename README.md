@@ -6,7 +6,7 @@
   A dependency-free Rust forwarding core with Linux TUN I/O and a read-only local dashboard.
 </p>
 <p align="center">
-  <a href="#quickstart">Quickstart</a> · <a href="docs/ARCHITECTURE.md">Architecture</a> · <a href="docs/DEMO-VIDEO.md">Sampled video</a> · <a href="docs/RELEASE-STATUS.md">Verification</a> · <a href="docs/PUBLICATION-AUDIT.md">Publication audit</a>
+  <a href="#quickstart">Quickstart</a> · <a href="docs/ARCHITECTURE.md">Architecture</a> · <a href="docs/NAT-STORY.md">NAT demo</a> · <a href="docs/RELEASE-STATUS.md">Verification</a> · <a href="docs/PUBLICATION-AUDIT.md">Publication audit</a>
 </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Rust-zero_Cargo_dependencies-5eead4?labelColor=101f26" alt="Rust: zero Cargo dependencies">
@@ -19,12 +19,21 @@ and translate outbound flows with endpoint-dependent SNAT. Replies must match th
 remote tuple. The Rust process performs forwarding and NAT; the kernel supplies
 UDP endpoints and TUN boundaries.
 
-[![Genuine browser capture of current runtime counters with endpoint addresses hidden](docs/qa/rendered/frames/0000.png)](docs/DEMO-VIDEO.md)
+## Watch the NAT story
 
-*Actual browser capture from the isolated Linux lab, November 7, 2026.*
-[Watch the sampled recording](docs/qa/rendered/live-demo.mov): 12 genuine captures
-spanning 20.536 seconds, replayed at 1 FPS for 12 seconds. This is a downloadable,
-speed-adjusted recording, not a hosted live demo.
+[![Recorded real Linux UDP observations: request SNAT and reply reverse translation](docs/qa/nat-story/poster.png)](docs/qa/nat-story/nat-story.mp4)
+
+**[Watch the explanatory demo →](docs/qa/nat-story/nat-story.mp4)** · [Evidence and reproduction](docs/NAT-STORY.md)
+
+Follow a real request and reply through translation; watch two clients share one
+external address, allowed traffic pass while policy rejects a packet, and the
+path fail when the router stops—then recover after restart.
+
+Continuous browser recording of a **52-second captioned evidence replay**,
+not live packet-time footage. Tuples, TTLs, delivery results and drop counters come
+from actual isolated Linux UDP/TUN observations; arrows and highlight timing are
+explanatory. No synthesized packets or metrics. The earlier [sampled counter
+recording](docs/DEMO-VIDEO.md) remains available as historical dashboard QA.
 
 ## What it does
 
@@ -54,8 +63,8 @@ cargo test --locked --offline
 python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-The existing baseline has **17 Rust and 27 Python tests**. Additional documentation
-checks cover links, SVG safety and packaging preservation. Portable tests do not
+The current checks have **17 Rust and 35 Python tests**, plus a controlled-clock
+JavaScript replay test. Documentation checks cover links, SVG safety and packaging preservation. Portable tests do not
 exercise Linux TUN I/O. No Cargo or Python package dependencies are required.
 
 ### Real Linux packets
@@ -96,7 +105,7 @@ the stdlib dashboard is a local lab tool.
 
 [Public repository](https://github.com/tczartoryski/userspace-router), published after a reachable-history and media audit.
 No license has been selected and no license grant is made. No release or deployment
-is published by this documentation change. See [publication audit](docs/PUBLICATION-AUDIT.md).
+is published by this change. See [publication audit](docs/PUBLICATION-AUDIT.md).
 
 The [banner provenance](docs/img/PROVENANCE.md) records the original artwork and
 reference design intent. Browser evidence and its limitations are documented in

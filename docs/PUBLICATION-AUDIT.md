@@ -90,3 +90,32 @@ After the full pre-change audit, candidate `2b33e0d0c01ac0cae95e04342301b73a04c7
 The actual GitHub README was rendered and visually inspected in Chromium at 1440×1000 and 375×812. The original banner, all factual badges and genuine overview capture loaded at both widths. Document scroll widths matched the viewport (1440 and 375); navigation wrapped cleanly on mobile, the Quickstart link navigated to its anchor, and GitHub’s Mermaid architecture rendered without an error. Local Markdown/HTML image-link checks, SVG safety and extracted/repacked README preservation passed. Screenshot evidence is retained separately from source history. The original private development repository was not modified or connected to GitHub.
 
 The final documentation-only follow-up records these observed results and regenerates the package manifest; it introduces no new media or runtime behavior. License remains unselected and no license grant is made.
+
+## Explanatory NAT story publication — November 7, 2026
+
+The owner authorized a more explanatory demo and publication of sanitized code,
+documentation and media. Native Codex Sol implemented the collector/UI; the
+coordinator ran the real kernel UDP experiment in the existing isolated Ubuntu
+ARM64 lab. Passive AF_PACKET captures, both endpoint receipts and final router
+counters jointly pass all four checks. Only fixed fixture payloads and
+10.0.0.0/24 / 198.51.100.0/24 lab tuples appear in the reviewed observations.
+No raw process logs, guest paths, PIDs, credentials or personal files are included.
+The original private repository/history remains separate and untouched.
+
+The movie continuously records an actual ephemeral Chromium page rendering those
+verified observations. All 13 editorial substages and the finish state were
+observed; their captions, highlights and schematic arrows are explicitly
+distinguished from observed traffic. Real packet acquisition occurred before
+playback. Source VP9 WebM and final H.264 MP4 each decode all 1,427 frames at
+25 FPS (57.08 seconds, 1440×900); no time scaling, intermediate-frame invention
+or cuts were applied. First/middle/last and key-event decoded frames and each
+distinct rendered state were visually inspected. MP4 asset metadata is empty
+and there are no audio tracks. The poster is an actual decoded movie frame.
+Source recorder logs, task-local compatibility tools and bulk frames stay private.
+
+An explicit source/UI/media package allowlist includes only the four reviewed
+story assets. All package text is scanned; old reachable history remains
+sanitized. The earlier audit-pattern literal exceptions in scripts/package.py
+remain intentional. This bounded manual/heuristic review is not formal
+secret-free certification. No license, release, tag, deployment, host-route
+change or new dependency installation is part of this publication.

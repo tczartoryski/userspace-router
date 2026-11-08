@@ -1,4 +1,8 @@
-# Genuine demonstration video
+# Historical sampled dashboard video
+
+For the newer, explanatory request/reply, shared-address, policy and recovery
+demo, see [the NAT story](NAT-STORY.md) and its [continuous captioned movie](qa/nat-story/nat-story.mp4).
+The sampled counter recording below is retained as historical dashboard QA.
 
 Rendered QA PASS as of November 7, 2026. The coordinator inspected genuine
 [desktop](qa/rendered/desktop.jpg) and [mobile](qa/rendered/mobile.jpg) full-page

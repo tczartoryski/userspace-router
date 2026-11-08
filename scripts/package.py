@@ -17,9 +17,44 @@ RENDERED_FILES = ['docs/qa/rendered/' + name for name in
 RENDERED_FILES.extend(f'docs/qa/rendered/frames/{index:04d}.png' for index in range(12))
 BINARY_FILES = frozenset(name for name in RENDERED_FILES if not name.endswith('.json'))
 FILES.extend(RENDERED_FILES)
-for folder in ('src', 'tests', 'scripts', 'dashboard'):
-    FILES.extend(str(p.relative_to(ROOT)) for p in (ROOT/folder).rglob('*')
-                 if p.is_file() and p.suffix in ('.rs', '.py', '.sh', '.html', '.css', '.js', '.swift'))
+# Reviewed source/UI allowlist. Generated scenario JSON requires separate review.
+FILES.extend([
+    'dashboard/app.js',
+    'dashboard/index.html',
+    'dashboard/style.css',
+    'scripts/dashboard.py',
+    'scripts/demo.py',
+    'scripts/encode-demo.swift',
+    'scripts/extended.py',
+    'scripts/guest-demo.sh',
+    'scripts/linux-integration.sh',
+    'scripts/nat_story.py',
+    'scripts/package.py',
+    'scripts/read_snapshot.py',
+    'scripts/serve_story.py',
+    'scripts/test_dashboard.py',
+    'scripts/test_demo.py',
+    'scripts/test_documentation.py',
+    'scripts/test_extended_verifier.py',
+    'scripts/test_integration_bytecode.py',
+    'scripts/test_nat_story.py',
+    'scripts/test_story_timing.cjs',
+    'scripts/test_package.py',
+    'scripts/test_retained.py',
+    'scripts/test_verifier.py',
+    'scripts/traffic.py',
+    'src/bin/udp-router.rs',
+    'src/lib.rs',
+    'src/linux.rs',
+    'story/app.js',
+    'story/index.html',
+    'story/style.css',
+    'tests/core.rs',
+])
+FILES.extend(['docs/NAT-STORY.md', 'docs/qa/nat-story/observations.json',
+              'docs/qa/nat-story/capture.json', 'docs/qa/nat-story/nat-story.mp4',
+              'docs/qa/nat-story/poster.png'])
+BINARY_FILES = BINARY_FILES | {'docs/qa/nat-story/nat-story.mp4', 'docs/qa/nat-story/poster.png'}
 
 
 def sanitize_architecture(text):

@@ -1,0 +1,350 @@
+{
+  "clients": [
+    {
+      "local": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-one",
+      "peer": [
+        "198.51.100.2",
+        9000
+      ],
+      "remote": [
+        "198.51.100.2",
+        9000
+      ],
+      "reply": "nat-story-one",
+      "timed_out": false,
+      "ttl": 63
+    },
+    {
+      "local": [
+        "10.0.0.3",
+        12345
+      ],
+      "payload": "nat-story-two",
+      "peer": [
+        "198.51.100.2",
+        9000
+      ],
+      "remote": [
+        "198.51.100.2",
+        9000
+      ],
+      "reply": "nat-story-two",
+      "timed_out": false,
+      "ttl": 63
+    },
+    {
+      "local": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-blocked",
+      "remote": [
+        "198.51.100.3",
+        9000
+      ],
+      "timed_out": true
+    },
+    {
+      "local": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-stopped",
+      "remote": [
+        "198.51.100.2",
+        9000
+      ],
+      "timed_out": true
+    },
+    {
+      "local": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-recovered",
+      "peer": [
+        "198.51.100.2",
+        9000
+      ],
+      "remote": [
+        "198.51.100.2",
+        9000
+      ],
+      "reply": "nat-story-recovered",
+      "timed_out": false,
+      "ttl": 63
+    }
+  ],
+  "inside": [
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-one",
+      "src": [
+        "10.0.0.2",
+        12345
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "incoming",
+      "dst": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-one",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 63
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-two",
+      "src": [
+        "10.0.0.3",
+        12345
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "incoming",
+      "dst": [
+        "10.0.0.3",
+        12345
+      ],
+      "payload": "nat-story-two",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 63
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.3",
+        9000
+      ],
+      "payload": "nat-story-blocked",
+      "src": [
+        "10.0.0.2",
+        12345
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-stopped",
+      "src": [
+        "10.0.0.2",
+        12345
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-recovered",
+      "src": [
+        "10.0.0.2",
+        12345
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "incoming",
+      "dst": [
+        "10.0.0.2",
+        12345
+      ],
+      "payload": "nat-story-recovered",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 63
+    }
+  ],
+  "kind": "recorded-real-linux-udp",
+  "outside": [
+    {
+      "direction": "incoming",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-one",
+      "src": [
+        "198.51.100.1",
+        40000
+      ],
+      "ttl": 63
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.1",
+        40000
+      ],
+      "payload": "nat-story-one",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "incoming",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-two",
+      "src": [
+        "198.51.100.1",
+        40001
+      ],
+      "ttl": 63
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.1",
+        40001
+      ],
+      "payload": "nat-story-two",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 64
+    },
+    {
+      "direction": "incoming",
+      "dst": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-recovered",
+      "src": [
+        "198.51.100.1",
+        40000
+      ],
+      "ttl": 63
+    },
+    {
+      "direction": "outgoing",
+      "dst": [
+        "198.51.100.1",
+        40000
+      ],
+      "payload": "nat-story-recovered",
+      "src": [
+        "198.51.100.2",
+        9000
+      ],
+      "ttl": 64
+    }
+  ],
+  "runs": [
+    {
+      "Address": 0,
+      "Capacity": 0,
+      "Checksum": 0,
+      "Clock": 0,
+      "Filter": 0,
+      "Fragment": 0,
+      "Malformed": 0,
+      "Mtu": 0,
+      "Options": 0,
+      "Policy": 1,
+      "Protocol": 2,
+      "Route": 0,
+      "Ttl": 0,
+      "active": 2,
+      "expired": 0,
+      "forwarded": 4,
+      "io_drops": 0,
+      "received": 7
+    },
+    {
+      "Address": 0,
+      "Capacity": 0,
+      "Checksum": 0,
+      "Clock": 0,
+      "Filter": 0,
+      "Fragment": 0,
+      "Malformed": 0,
+      "Mtu": 0,
+      "Options": 0,
+      "Policy": 0,
+      "Protocol": 0,
+      "Route": 0,
+      "Ttl": 0,
+      "active": 1,
+      "expired": 0,
+      "forwarded": 2,
+      "io_drops": 0,
+      "received": 2
+    }
+  ],
+  "schema": 1,
+  "server": [
+    {
+      "local": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-one",
+      "peer": [
+        "198.51.100.1",
+        40000
+      ],
+      "ttl": 63
+    },
+    {
+      "local": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-two",
+      "peer": [
+        "198.51.100.1",
+        40001
+      ],
+      "ttl": 63
+    },
+    {
+      "local": [
+        "198.51.100.2",
+        9000
+      ],
+      "payload": "nat-story-recovered",
+      "peer": [
+        "198.51.100.1",
+        40000
+      ],
+      "ttl": 63
+    }
+  ]
+}

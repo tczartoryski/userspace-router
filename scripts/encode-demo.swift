@@ -1,5 +1,5 @@
 // Encode coordinator-captured browser PNG frames; no traffic or image synthesis.
-// swift scripts/encode-demo.swift FRAME_DIRECTORY OUTPUT.mov FPS
+// swift scripts/encode-demo.swift FRAME_DIRECTORY OUTPUT.mov|OUTPUT.mp4 FPS
 import AppKit
 import AVFoundation
 import Foundation
@@ -22,7 +22,7 @@ func load(_ url: URL) -> CGImage {
 let first = load(frames[0]), width = first.width, height = first.height
 guard width > 0, height > 0, width <= 4096, height <= 4096,
       width % 2 == 0, height % 2 == 0 else { fail("Frames must have even dimensions <=4096") }
-let writer = try AVAssetWriter(outputURL: output, fileType: .mov)
+let writer = try AVAssetWriter(outputURL: output, fileType: output.pathExtension.lowercased() == "mp4" ? .mp4 : .mov)
 let track = AVAssetWriterInput(mediaType: .video, outputSettings: [
     AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: width, AVVideoHeightKey: height
 ])
