@@ -19,6 +19,7 @@ import time
 import uuid
 
 from traffic import launch, DROP_REASONS, COUNTER_KEYS
+from dashboard import validate_snapshot
 
 SIZES = (64, 128, 512, 1400)
 MODES = ('cold', 'warm')
@@ -445,7 +446,7 @@ def router_arguments(flows, workers, queue_depth):
             '--workers',str(workers),'--queue-depth',str(queue_depth),'--idle-seconds','120']
 
 
-def experiment(binary, backend, mode, size, flows, count, window, profile, deadline, workers=1, queue_depth=64):
+def experiment(binary, backend, mode, size, flows, count, window, profile, deadline, workers=1, queue_depth=64, telemetry=False, event_sample_every=0):
     with tempfile.TemporaryDirectory(prefix='router-v2-private-') as tmp:
         lab = Lab(tmp, deadline)
         router = None
@@ -455,8 +456,12 @@ def experiment(binary, backend, mode, size, flows, count, window, profile, deadl
             wait_file(lab.root/'server.ready',4,[server])
             check(load(lab.root/'server.ready') == {'ready':True}, 'server readiness schema')
             if backend == 'user':
+                extra=router_arguments(flows,workers,queue_depth)
+                if telemetry:
+                    extra += ['--snapshot',str(lab.root/'snapshot.json'),'--report-seconds','1']
+                    if event_sample_every: extra += ['--event-sample-every',str(event_sample_every)]
                 env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1',
-                           UDP_ROUTER_EXTRA_ARGS=json.dumps(router_arguments(flows,workers,queue_depth)))
+                           UDP_ROUTER_EXTRA_ARGS=json.dumps(extra))
                 router = lab.spawn(lab.r,[sys.executable,'-B',SCRIPT,'launch',lab.c,lab.s,binary],'router',env)
                 end = time.monotonic()+4
                 while 'userspace forwarding ready' not in (lab.root/'router.log').read_text():
@@ -490,6 +495,18 @@ def experiment(binary, backend, mode, size, flows, count, window, profile, deadl
                 stop(router)
                 check(router.returncode == 0, 'router failed')
                 router_counters = counters(lab.root/'router.log')
+                telemetry_data=None
+                if telemetry:
+                    raw_snapshot=load(lab.root/'snapshot.json')
+                    validate_snapshot(raw_snapshot)
+                    check(not raw_snapshot['running'], 'shutdown snapshot state')
+                    if workers>1:
+                        check(raw_snapshot['schema']==2 and len(raw_snapshot['workers'])==workers and raw_snapshot['event_sample_every']==event_sample_every, 'snapshot settings')
+                        telemetry_data=raw_snapshot
+                    else:
+                        core=raw_snapshot['core']
+                        telemetry_data=dict(kind='reference-counter-summary',schema=1,running=False,core={k:core[k] for k in ('received','forwarded','expired','active','drops')},io_drops=raw_snapshot['io_drops'])
+
             else:
                 lab.ns(lab.r,'sysctl','-q','-w','net.ipv4.ip_forward=0')
                 router_counters = None
@@ -511,6 +528,7 @@ def experiment(binary, backend, mode, size, flows, count, window, profile, deadl
             busy_ticks = total_ticks-(guest_after['idle']-guest_before['idle'])
             result.update(backend=backend, mode=mode, size=size, flows=flows, window=window,
                           profile=profile, diagnostic=diagnostic, negative_control=control,
+                          telemetry_enabled=telemetry, event_sample_every=event_sample_every, telemetry=telemetry_data if backend == "user" else None,
                           workers=workers if backend == 'user' else None, queue_depth=queue_depth if backend == 'user' and workers > 1 else None,
                           worker_note='4 workers oversubscribe the approved 2-vCPU lab' if backend == 'user' and workers == 4 else '',
                           delivered_pps=result['received']/wall_seconds,
@@ -548,11 +566,11 @@ def aggregate(values):
 def summarize(rows):
     groups = {}
     for row in rows:
-        key = tuple(row[k] for k in ('backend','mode','size','flows','profile','workers','queue_depth'))
+        key = tuple(row.get(k,False if k=='telemetry_enabled' else 0) for k in ('backend','mode','size','flows','profile','workers','queue_depth','telemetry_enabled','event_sample_every'))
         groups.setdefault(key,[]).append(row)
     result = []
     for key,group in sorted(groups.items()):
-        result.append(dict(zip(('backend','mode','size','flows','profile','workers','queue_depth'),key),
+        result.append(dict(zip(('backend','mode','size','flows','profile','workers','queue_depth','telemetry_enabled','event_sample_every'),key),
                            repeats=len(group), delivered_pps=aggregate([r['delivered_pps'] for r in group]),
                            rtt_p50_ns=aggregate([r['rtt']['p50_ns'] for r in group]),
                            rtt_p95_ns=aggregate([r['rtt']['p95_ns'] for r in group]),
@@ -584,6 +602,8 @@ def main():
     parser.add_argument('--count',type=int,default=1500)
     parser.add_argument('--window',type=int,choices=(64,128),default=64)
     parser.add_argument('--workers',type=int,choices=(1,2,4),default=1)
+    parser.add_argument('--snapshot-telemetry',action='store_true')
+    parser.add_argument('--event-sample-every',type=int,default=0)
     parser.add_argument('--queue-depth',type=int,default=64)
     parser.add_argument('--repeats',type=int,default=3)
     parser.add_argument('--backend',choices=('both','user','kernel'),default='both')
@@ -594,6 +614,8 @@ def main():
     a = parser.parse_args(args)
     check(1 <= a.flows <= 512 and a.flows <= a.count <= 20000, 'flow/count bounds')
     router_arguments(a.flows,a.workers,a.queue_depth)
+    check(0 <= a.event_sample_every <= 2**64-1 and (not a.event_sample_every or (a.snapshot_telemetry and a.workers>1)), 'sampling requires multicore telemetry')
+    check(not a.snapshot_telemetry or a.backend == 'user', 'telemetry overhead jobs require --backend user')
     check(3 <= a.repeats <= 5, 'repeats 3..5')
     check(re.fullmatch(r'[A-Za-z0-9 .,+()=_-]{1,240}',a.metadata), 'generic metadata only')
     check(a.profile == 'none' or a.backend == 'user', 'profiling is a separate userspace diagnostic job')
@@ -613,12 +635,13 @@ def main():
             for backend in backends[::1 if repeat % 2 == 0 else -1]:
                 for mode in modes:
                     row = experiment(str(a.binary.resolve()),backend,mode,a.size,a.flows,a.count,
-                                     a.window,a.profile,deadline,a.workers,a.queue_depth)
+                                     a.window,a.profile,deadline,a.workers,a.queue_depth,a.snapshot_telemetry,a.event_sample_every)
                     row['repeat'] = repeat+1
                     rows.append(row)
         summary = summarize(rows)
         result = dict(schema=1,kind='REAL-LINUX-E2E' if a.profile == 'none' else 'PROFILE-DIAGNOSTIC',
                       metadata=a.metadata, count=a.count, repeats=a.repeats, rows=rows, summary=summary,
+                      telemetry_enabled=a.snapshot_telemetry,event_sample_every=a.event_sample_every,
                       boundary='socket RTT; batch delivery rate includes up to 50ms receive grace only if replies are missing',
                       cpu='process ticks / CLK_TCK; generator process_time_ns; guest aggregate proc-stat ticks',
                       rss='router sampled at start and every 20ms; not lifetime high-water mark')

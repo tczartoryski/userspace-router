@@ -42,6 +42,20 @@ pub fn write_packet(
         "packet write retry bound",
     ))
 }
+/// All cleanup results are evaluated before entry. Never publish a clean final
+/// observation after dispatcher, worker-join or backend-shutdown failure.
+pub fn finish_dispatch<T>(
+    outcome: io::Result<()>,
+    joined: io::Result<T>,
+    backend: io::Result<()>,
+    publish: impl FnOnce(&T) -> io::Result<()>,
+) -> io::Result<()> {
+    outcome?;
+    let state = joined?;
+    backend?;
+    publish(&state)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

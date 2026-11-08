@@ -84,3 +84,48 @@ strict Clippy including Linux ABI, JS syntax/replay, shell syntax, package
 round-trip/allowlist and whitespace checks pass. Actual Linux results are verified above. The explicit manifest is regenerated;
 historical benchmark artifacts are unchanged. Nine audited raw measurement files
 are explicitly allowlisted; private raw logs remain outside the repository.
+
+
+## Verified actual-state observability and resilience
+
+[Contract](OBSERVABILITY.md), [resilience gates](RESILIENCE.md) and
+[actual results](MONITORING-RESULTS.md) describe private schema2 snapshots,
+per-worker periodic state, bounded queue accounting, actual TUN TX and monotonic
+rates. Schema1 remains supported. Sampling is off by default, newest64 per worker,
+zero tuples/payloads in schema2. Strict privacy and0700/0600/atomic/loopback guards.
+
+30 native Linux Rust tests pass.58 Python and portable fmt/strict Clippy/Linux ABI,
+JS/DOM/shell/package gates pass. Actual four-worker adversarial wrongremote/expiry,
+local exhaustion with global free capacity, same-source-port disjoint NAT,
+reallocation, policy and stopped-path controls pass.26304overload datagrams yielded
+771verified replies,25398input-full and135output-full drops: deliberate overload
+loss.27paced echoes over3.297s generated3periodic live snapshots; monitored final
+queue/TX conservation and clean joins pass. Backend errors suppress clean final
+snapshots, tested separately by portable injection.
+
+24monitoring off/on/sampled experiments completed without payload loss. Two-worker
+p99 worsened1040.4us to1262.9us (sampled1622.2us). Four-worker sampled rate fell2.08%
+with worsened p99. Full ranges retained; no free monitoring claim. Short timing
+cells do not isolate steady fsync cost; paced acceptance is not a timing substitute.
+Earlier multicore15.68–24.69% regressions remain prominent; reference1default retained.
+
+Rendered retained actual stopped snapshot checked at desktop1440px/mobile390px:
+4workers,70redacted decisions, OFFLINE/unavailable rates, no overflow/console errors.
+Not live traffic footage. Guest acceptance separately validates periodic live writes.
+
+Namespaces/helpers cleaned; VM verified stopped. Task-owned QA server intentionally
+SIGTERM terminated (exit15), listener gone and QA tab closed. Only audited aggregate,
+fixture-network evidence and screenshots packaged. No installs/host networking,
+resource/provider/cost/merge/license/release changes.
+
+## Remaining final-review gates
+
+- Live dashboard current/stale/offline browser transitions, compelling v2 demo,
+  architecture/performance charts and final presentation/README polish.
+- Wider OS fault campaign (WouldBlock/EOF/hangup/shortwrite, monitored worker panic,
+  SIGKILL recovery) not established by portable injections. Explicitly unverified.
+- Longer randomized steady monitoring/fsync timing and separate per-worker CPU
+  remain limitations; no hardware counters or universal multicore speedup.
+- AF_XDP conditional/unimplemented: L2 semantics, attach authority, UMEM/ring
+  ownership and actual acceptance/measurement missing.
+- Final sanitized review PR; no merge or main changes.

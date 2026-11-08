@@ -1,5 +1,7 @@
 //! Bounded dispatcher/worker ownership; each thread exclusively owns its Router.
+use crate::observability::{Decision, Observed, ObservedWorker, QueueState};
 use crate::{packet_io::MAX_PACKET_BYTES, Config, Counters, Forward, Packet, Router, Side};
+use std::collections::VecDeque;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     mpsc::{self, Receiver, SyncSender, TrySendError},
@@ -55,6 +57,8 @@ pub struct WorkerReport {
     pub active: usize,
     pub output_drops: u64,
     pub shutdown_drops: u64,
+    pub observed_ns: u64,
+    pub events: VecDeque<Decision>,
 }
 #[derive(Clone, Debug, Default)]
 pub struct Summary {
@@ -105,27 +109,78 @@ pub struct Pool {
     stop: Arc<AtomicBool>,
     rejected: Counters,
     input_drops: u64,
+    monitor: Option<Monitor>,
+}
+struct Monitor {
+    inputs: Vec<Arc<Mutex<QueueState>>>,
+    output: Arc<Mutex<QueueState>>,
+    every: u64,
+}
+struct WorkerContext {
+    stop: Arc<AtomicBool>,
+    epoch: Instant,
+    report: Arc<Mutex<WorkerReport>>,
+    wake: Arc<dyn Fn() + Send + Sync>,
+    input_metric: Option<Arc<Mutex<QueueState>>>,
+    output_metric: Option<Arc<Mutex<QueueState>>>,
+    every: u64,
 }
 fn worker_loop(
     router: &mut Router,
     input: Receiver<Task>,
     output: SyncSender<Forward>,
-    stop: Arc<AtomicBool>,
-    epoch: Instant,
-    report: Arc<Mutex<WorkerReport>>,
-    wake: Arc<dyn Fn() + Send + Sync>,
+    context: WorkerContext,
 ) -> WorkerReport {
+    let WorkerContext {
+        stop,
+        epoch,
+        report,
+        wake,
+        input_metric,
+        output_metric,
+        every,
+    } = context;
     let mut result = WorkerReport::default();
     let mut published = Instant::now();
     while !stop.load(Ordering::Relaxed) {
         let _ = router.expire(epoch.elapsed().as_secs());
         match input.recv_timeout(Duration::from_millis(20)) {
             Ok(Task::Packet(side, bytes)) => {
-                if let Ok(packet) = router.process(side, &bytes, epoch.elapsed().as_secs()) {
+                let length = bytes.len();
+                let decision = router.process(side, &bytes, epoch.elapsed().as_secs());
+                if every != 0 {
+                    crate::observability::sample(
+                        &mut result.events,
+                        every,
+                        router.counters.received,
+                        || Decision {
+                            monotonic_ns: epoch.elapsed().as_nanos() as u64,
+                            side,
+                            reason: match &decision {
+                                Ok(_) => "Forward".into(),
+                                Err(reason) => format!("{reason:?}"),
+                            },
+                            bytes: length,
+                        },
+                    );
+                }
+                if let Ok(packet) = decision {
+                    let mut metric = output_metric
+                        .as_ref()
+                        .map(|m| m.lock().expect("output metric poisoned"));
                     if output.try_send(packet).is_err() {
                         result.output_drops = result.output_drops.saturating_add(1);
+                        if let Some(m) = metric.as_mut() {
+                            m.dropped = m.dropped.saturating_add(1);
+                        }
+                    } else if let Some(m) = metric.as_mut() {
+                        m.admit();
                     }
+                    drop(metric);
                     wake();
+                }
+                if let Some(m) = &input_metric {
+                    m.lock().expect("input metric poisoned").complete();
                 }
             }
             #[cfg(test)]
@@ -138,15 +193,21 @@ fn worker_loop(
         if published.elapsed() >= Duration::from_millis(250) {
             result.counters = router.counters.clone();
             result.active = router.active_flows();
+            result.observed_ns = epoch.elapsed().as_nanos() as u64;
             *report.lock().expect("worker report poisoned") = result.clone();
             published = Instant::now();
         }
     }
     while input.try_recv().is_ok() {
         result.shutdown_drops = result.shutdown_drops.saturating_add(1);
+        if let Some(m) = &input_metric {
+            m.lock().expect("input metric poisoned").discard();
+        }
     }
     result.counters = router.counters.clone();
     result.active = router.active_flows();
+    result.observed_ns = epoch.elapsed().as_nanos() as u64;
+    *report.lock().expect("worker report poisoned") = result.clone();
     result
 }
 impl Pool {
@@ -156,6 +217,18 @@ impl Pool {
         queue: usize,
         epoch: Instant,
         wake: Arc<dyn Fn() + Send + Sync>,
+    ) -> Result<Self, &'static str> {
+        Self::observed(config, workers, queue, epoch, wake, false, 0)
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn observed(
+        config: Config,
+        workers: usize,
+        queue: usize,
+        epoch: Instant,
+        wake: Arc<dyn Fn() + Send + Sync>,
+        monitoring: bool,
+        every: u64,
     ) -> Result<Self, &'static str> {
         if !(1..=1024).contains(&queue) {
             return Err("queue requires 1..1024 slots");
@@ -173,18 +246,39 @@ impl Pool {
             stop,
             rejected: Counters::default(),
             input_drops: 0,
+            monitor: monitoring.then(|| Monitor {
+                inputs: (0..workers)
+                    .map(|_| Arc::new(Mutex::new(QueueState::new(queue, true))))
+                    .collect(),
+                output: Arc::new(Mutex::new(QueueState::new(queue, false))),
+                every,
+            }),
         };
-        for config in &pool.shards.configs {
+        for (id, config) in pool.shards.configs.iter().enumerate() {
             let mut router = Router::new(config.clone())?;
             let (sender, input) = mpsc::sync_channel(queue);
             let flag = pool.stop.clone();
             let output = output.clone();
             let wake = wake.clone();
-            let report = Arc::new(Mutex::new(WorkerReport::default()));
+            let report = Arc::new(Mutex::new(WorkerReport {
+                counters: router.counters.clone(),
+                active: router.active_flows(),
+                observed_ns: epoch.elapsed().as_nanos() as u64,
+                ..WorkerReport::default()
+            }));
             let shared = report.clone();
+            let context = WorkerContext {
+                stop: flag,
+                epoch,
+                report: shared,
+                wake,
+                input_metric: pool.monitor.as_ref().map(|m| m.inputs[id].clone()),
+                output_metric: pool.monitor.as_ref().map(|m| m.output.clone()),
+                every: if monitoring { every } else { 0 },
+            };
             let join = thread::Builder::new()
                 .name("router-worker".into())
-                .spawn(move || worker_loop(&mut router, input, output, flag, epoch, shared, wake))
+                .spawn(move || worker_loop(&mut router, input, output, context))
                 .map_err(|_| "worker spawn failed")?;
             pool.workers.push(Worker {
                 sender: Some(sender),
@@ -218,22 +312,76 @@ impl Pool {
             }
         };
         let owner = self.shards.owner(side, &packet);
+        let mut metric = self
+            .monitor
+            .as_ref()
+            .map(|m| m.inputs[owner].lock().expect("input metric poisoned"));
         match self.workers[owner]
             .sender
             .as_ref()
             .ok_or("pool stopped")?
             .try_send(Task::Packet(side, bytes))
         {
-            Ok(()) => Ok(()),
+            Ok(()) => {
+                if let Some(m) = metric.as_mut() {
+                    m.admit();
+                }
+                Ok(())
+            }
             Err(TrySendError::Full(_)) => {
                 self.input_drops = self.input_drops.saturating_add(1);
+                if let Some(m) = metric.as_mut() {
+                    m.dropped = m.dropped.saturating_add(1);
+                }
                 Ok(())
             }
             Err(TrySendError::Disconnected(_)) => Err("worker disconnected"),
         }
     }
     pub fn receive(&self) -> Option<Forward> {
-        self.outputs.try_recv().ok()
+        let mut metric = self
+            .monitor
+            .as_ref()
+            .map(|m| m.output.lock().expect("output metric poisoned"));
+        let packet = self.outputs.try_recv().ok();
+        if packet.is_some() {
+            if let Some(m) = metric.as_mut() {
+                m.complete();
+            }
+        }
+        packet
+    }
+    pub fn observation(&self) -> Result<Option<Observed>, &'static str> {
+        let Some(m) = &self.monitor else {
+            return Ok(None);
+        };
+        let mut workers = Vec::new();
+        for (id, w) in self.workers.iter().enumerate() {
+            let report = w
+                .report
+                .lock()
+                .map_err(|_| "worker report poisoned")?
+                .clone();
+            let input = m.inputs[id]
+                .lock()
+                .map_err(|_| "input metric poisoned")?
+                .clone();
+            workers.push(ObservedWorker {
+                config: self.shards.configs[id].clone(),
+                report,
+                input,
+            });
+        }
+        Ok(Some(Observed {
+            workers,
+            output: m
+                .output
+                .lock()
+                .map_err(|_| "output metric poisoned")?
+                .clone(),
+            dispatcher: self.rejected.clone(),
+            sample_every: m.every,
+        }))
     }
     pub fn summary(&self) -> Result<Summary, &'static str> {
         let mut result = Summary {
@@ -272,6 +420,9 @@ impl Pool {
         }
         while self.outputs.try_recv().is_ok() {
             result.queue_drops = result.queue_drops.saturating_add(1);
+            if let Some(m) = &self.monitor {
+                m.output.lock().expect("output metric poisoned").discard();
+            }
         }
         if failed {
             Err("worker panicked; all workers joined")
@@ -504,5 +655,174 @@ mod tests {
         assert!(pool.submit(Side::Inside, outbound(1)).is_err());
         assert!(pool.shutdown().is_err());
         assert!(pool.workers.iter().all(|w| w.join.is_none()));
+    }
+}
+
+#[cfg(test)]
+mod observation_tests {
+    use super::*;
+    use crate::{checksum, udp_checksum, Route};
+    fn fixture() -> (Config, Vec<u8>) {
+        let src = "10.0.0.2".parse::<std::net::Ipv4Addr>().unwrap();
+        let dst = "198.51.100.2".parse::<std::net::Ipv4Addr>().unwrap();
+        let config = Config {
+            external: "198.51.100.1".parse().unwrap(),
+            ports: (40000, 40015),
+            max_flows: 16,
+            idle_seconds: 10,
+            mtu: 1500,
+            routes: vec![
+                Route::new("0.0.0.0".parse().unwrap(), 0, Side::Outside).unwrap(),
+                Route::new("10.0.0.0".parse().unwrap(), 24, Side::Inside).unwrap(),
+            ],
+        };
+        let mut b = vec![0; 64];
+        b[0] = 0x45;
+        b[2..4].copy_from_slice(&64u16.to_be_bytes());
+        b[8] = 64;
+        b[9] = 17;
+        b[12..16].copy_from_slice(&src.octets());
+        b[16..20].copy_from_slice(&dst.octets());
+        b[20..22].copy_from_slice(&1234u16.to_be_bytes());
+        b[22..24].copy_from_slice(&9000u16.to_be_bytes());
+        b[24..26].copy_from_slice(&44u16.to_be_bytes());
+        let sum = checksum(&b[..20]);
+        b[10..12].copy_from_slice(&sum.to_be_bytes());
+        let sum = udp_checksum(src, dst, &b[20..]);
+        b[26..28].copy_from_slice(&sum.to_be_bytes());
+        (config, b)
+    }
+    #[test]
+    fn actual_worker_snapshot_conserves_ledgers_and_bounds_private_samples() {
+        let (config, packet) = fixture();
+        let epoch = Instant::now();
+        let mut pool = Pool::observed(config, 4, 2, epoch, Arc::new(|| {}), true, 1).unwrap();
+        for _ in 0..128 {
+            pool.submit(Side::Inside, packet.clone()).unwrap();
+            let end = Instant::now() + Duration::from_secs(2);
+            while pool.receive().is_none() {
+                assert!(Instant::now() < end);
+                thread::yield_now();
+            }
+        }
+        let final_state = pool.shutdown().unwrap();
+        assert_eq!(final_state.counters.forwarded, 128);
+        let observed = pool.observation().unwrap().unwrap();
+        assert_eq!(observed.output.admitted, 128);
+        assert_eq!(observed.output.completed, 128);
+        assert_eq!(observed.output.occupancy, 0);
+        for w in &observed.workers {
+            assert_eq!(w.input.admitted, w.input.completed + w.input.shutdown_drops);
+            assert_eq!(w.input.completed, w.report.counters.received);
+            assert!(w.input.high_water <= w.input.capacity as u64);
+            assert!(w.report.events.len() <= 64);
+        }
+        assert_eq!(
+            observed
+                .workers
+                .iter()
+                .map(|w| w.report.events.len())
+                .sum::<usize>(),
+            64
+        );
+        let mut sampler = crate::observability::Sampler::default();
+        let now = epoch.elapsed().as_nanos() as u64;
+        let json = sampler.json(
+            &observed,
+            now,
+            100,
+            false,
+            &["tun-in".into(), "tun-out".into()],
+            128,
+            8192,
+            0,
+        );
+        assert!(json.contains("\"schema\":2"));
+        assert!(!json.contains("10.0.0.2"));
+        assert!(!json.contains("payload"));
+        assert!(json.len() < 1_048_576);
+        if let Ok(path) = std::env::var("UDP_ROUTER_TEST_SNAPSHOT") {
+            std::fs::write(path, &json).unwrap();
+        }
+        let next = sampler.json(
+            &observed,
+            now + 1_000_000_000,
+            101,
+            false,
+            &["tun-in".into(), "tun-out".into()],
+            128,
+            8192,
+            0,
+        );
+        assert!(next.contains("\"tx_pps\":0.000000"));
+    }
+    #[test]
+    fn generated_affinity_and_malformed_ingress_remain_bounded() {
+        let (config, packet) = fixture();
+        let mut seed = 17u64;
+        for count in [1, 2, 4, 16] {
+            let shards = Shards::new(&config, count).unwrap();
+            for _ in 0..4096 {
+                seed ^= seed << 13;
+                seed ^= seed >> 7;
+                seed ^= seed << 17;
+                let mut p = Packet::parse(&packet).unwrap();
+                p.sport = (seed % 65535 + 1) as u16;
+                let owner = shards.owner(Side::Inside, &p);
+                p.dport = 123;
+                p.dst = "198.51.100.3".parse().unwrap();
+                assert_eq!(owner, shards.owner(Side::Inside, &p));
+                assert!(owner < count);
+                p.dport = shards.configs[owner].ports.1;
+                assert_eq!(owner, shards.owner(Side::Outside, &p));
+            }
+        }
+        let mut pool =
+            Pool::observed(config, 4, 1, Instant::now(), Arc::new(|| {}), true, 0).unwrap();
+        for len in 0..64 {
+            pool.submit(Side::Inside, vec![0; len]).unwrap();
+        }
+        pool.shutdown().unwrap();
+        let observed = pool.observation().unwrap().unwrap();
+        assert_eq!(observed.dispatcher.received, 64);
+        assert!(observed.workers.iter().all(|w| w.report.events.is_empty()));
+    }
+}
+
+#[cfg(test)]
+mod dispatcher_failure_tests {
+    use super::*;
+    #[test]
+    fn backend_failure_joins_all_workers_without_clean_snapshot() {
+        let config = Config {
+            external: "198.51.100.1".parse().unwrap(),
+            ports: (40000, 40007),
+            max_flows: 4,
+            idle_seconds: 2,
+            mtu: 1500,
+            routes: vec![crate::Route::new("0.0.0.0".parse().unwrap(), 0, Side::Outside).unwrap()],
+        };
+        let mut pool = Pool::new(config, 4, 1, Instant::now(), Arc::new(|| {})).unwrap();
+        let joined = pool.shutdown().map_err(std::io::Error::other);
+        assert!(pool.workers.iter().all(|w| w.join.is_none()));
+        let mut published = false;
+        let result = crate::packet_io::finish_dispatch(
+            Err(std::io::Error::other("injected dispatcher backend failure")),
+            joined,
+            Ok(()),
+            |_| {
+                published = true;
+                Ok(())
+            },
+        );
+        assert!(result.is_err());
+        assert!(!published);
+        let mut normal = false;
+        crate::packet_io::finish_dispatch(Ok(()), Ok(()), Ok(()), |_| {
+            normal = true;
+            Ok(())
+        })
+        .unwrap();
+        assert!(normal);
     }
 }

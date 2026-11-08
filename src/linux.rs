@@ -141,7 +141,7 @@ fn check_distinct(files: &[File; 2]) -> io::Result<()> {
     }
     Ok(())
 }
-const HELP: &str = "Usage: udp-router --inside NAME --outside NAME --external IPv4 --route CIDR=inside --route CIDR=outside [--ports FIRST-LAST] [--max-flows N] [--idle-seconds N] [--mtu N] [--report-seconds N] [--snapshot PRIVATE_DIRECTORY/FILE] [--workers 1..32] [--queue-depth 1..1024]\nAttach only to precreated persistent single-queue TUN/NO_PI devices owned by the caller. Alternatively use --inside-fd FD and --outside-fd FD for preattached devices. All process capabilities are dropped before attachment. No routes, addresses, firewall rules or forwarding sysctls are changed.";
+const HELP: &str = "Usage: udp-router --inside NAME --outside NAME --external IPv4 --route CIDR=inside --route CIDR=outside [--ports FIRST-LAST] [--max-flows N] [--idle-seconds N] [--mtu N] [--report-seconds N] [--snapshot PRIVATE_DIRECTORY/FILE] [--workers 1..32] [--queue-depth 1..1024] [--event-sample-every N]\nAttach only to precreated persistent single-queue TUN/NO_PI devices owned by the caller. Alternatively use --inside-fd FD and --outside-fd FD for preattached devices. All process capabilities are dropped before attachment. No routes, addresses, firewall rules or forwarding sysctls are changed.";
 struct Options {
     inside: String,
     outside: String,
@@ -150,10 +150,12 @@ struct Options {
     snapshot: Option<String>,
     workers: usize,
     queue: usize,
+    every: u64,
 }
 fn parse() -> Result<Options, String> {
     let mut workers = 1;
     let mut queue = 64;
+    let mut every = 0;
     let mut snapshot = None;
     let mut inside = None;
     let mut outside = None;
@@ -199,6 +201,9 @@ fn parse() -> Result<Options, String> {
                     b.parse().map_err(|_| "invalid port")?,
                 );
             }
+            "--event-sample-every" => {
+                every = value.parse().map_err(|_| "invalid event sample interval")?
+            }
             "--workers" => workers = value.parse().map_err(|_| "invalid workers")?,
             "--queue-depth" => queue = value.parse().map_err(|_| "invalid queue depth")?,
             "--max-flows" => max_flows = value.parse().map_err(|_| "invalid max-flows")?,
@@ -235,8 +240,8 @@ fn parse() -> Result<Options, String> {
     if !(1..=32).contains(&workers) || !(1..=1024).contains(&queue) {
         return Err("workers 1..32 and queue depth 1..1024 required".into());
     }
-    if workers > 1 && snapshot.is_some() {
-        return Err("multicore snapshots are not implemented; use reference workers=1".into());
+    if every > 0 && (snapshot.is_none() || workers == 1) {
+        return Err("event sampling requires a multicore private snapshot".into());
     }
     Ok(Options {
         inside,
@@ -253,6 +258,7 @@ fn parse() -> Result<Options, String> {
         snapshot,
         workers,
         queue,
+        every,
     })
 }
 fn report(router: &Router, io_drops: u64) {
@@ -293,6 +299,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         snapshot,
         workers,
         queue,
+        every,
     } = parse().map_err(io::Error::other)?;
     let mut router = Router::new(config.clone()).map_err(io::Error::other)?;
     if workers > 1 {
@@ -334,7 +341,18 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
     if workers > 1 {
-        return run_parallel(files, config, workers, queue, interval);
+        return run_parallel(
+            files,
+            config,
+            workers,
+            queue,
+            interval,
+            MonitorOptions {
+                path: snapshot,
+                interfaces,
+                every,
+            },
+        );
     }
     let mut fds: [PollFd; 2] = files.each_ref().map(|file| PollFd {
         fd: file.as_raw_fd(),
@@ -434,6 +452,9 @@ fn snapshot_write(
         .map_err(io::Error::other)?
         .as_secs();
     let data = format!("{{\"schema\":1,\"unix_seconds\":{unix},\"uptime_seconds\":{now},\"running\":{running},\"io_drops\":{io_drops},\"interfaces\":[\"{}\",\"{}\"],\"core\":{}}}\n", interfaces[0], interfaces[1], router.telemetry(now));
+    snapshot_store(path, &data)
+}
+fn snapshot_store(path: &str, data: &str) -> io::Result<()> {
     if data.len() > 1_048_576 {
         return Err(io::Error::other("snapshot size bound"));
     }
@@ -502,12 +523,18 @@ fn report_parallel(summary: &userspace_udp_router::parallel::Summary, io_drops: 
     }
     eprintln!();
 }
+struct MonitorOptions {
+    path: Option<String>,
+    interfaces: Vec<String>,
+    every: u64,
+}
 fn run_parallel(
     files: [File; 2],
     config: Config,
     workers: usize,
     queue: usize,
     interval: u64,
+    monitor: MonitorOptions,
 ) -> Result<(), Box<dyn std::error::Error>> {
     use std::os::unix::net::UnixDatagram;
     use std::sync::Arc;
@@ -533,7 +560,7 @@ fn run_parallel(
         },
     ];
     let epoch = Instant::now();
-    let mut pool = Pool::new(
+    let mut pool = Pool::observed(
         config,
         workers,
         queue,
@@ -541,6 +568,8 @@ fn run_parallel(
         Arc::new(move || {
             let _ = wake.send(&[1]);
         }),
+        monitor.path.is_some(),
+        monitor.every,
     )
     .map_err(io::Error::other)?;
     let mut backend = TunIo {
@@ -548,6 +577,9 @@ fn run_parallel(
         scratch: Box::new([0; 65536]),
     };
     let mut io_drops = 0u64;
+    let mut tx = 0u64;
+    let mut tx_bytes = 0u64;
+    let mut sampler = userspace_udp_router::observability::Sampler::default();
     let mut last_report = 0;
     eprintln!("workers={workers} queue_depth={queue}; userspace forwarding ready");
     let outcome = (|| -> io::Result<()> {
@@ -576,8 +608,12 @@ fn run_parallel(
             }
             for _ in 0..queue {
                 if let Some(packet) = pool.receive() {
+                    let length = packet.packet.len() as u64;
                     if !backend.transmit(packet)? {
                         io_drops = io_drops.saturating_add(1);
+                    } else {
+                        tx = tx.saturating_add(1);
+                        tx_bytes = tx_bytes.saturating_add(length);
                     }
                 } else {
                     break;
@@ -592,6 +628,16 @@ fn run_parallel(
             }
             let now = epoch.elapsed().as_secs();
             if now - last_report >= interval {
+                parallel_snapshot(
+                    &pool,
+                    &monitor,
+                    &mut sampler,
+                    epoch,
+                    true,
+                    tx,
+                    tx_bytes,
+                    io_drops,
+                )?;
                 report_parallel(&pool.summary().map_err(io::Error::other)?, io_drops);
                 last_report = now;
             }
@@ -599,11 +645,74 @@ fn run_parallel(
         Ok(())
     })();
     let final_state = pool.shutdown().map_err(io::Error::other);
-    backend.shutdown()?;
-    if let Ok(ref summary) = final_state {
-        report_parallel(summary, io_drops);
-    }
-    outcome?;
-    final_state?;
+    let backend_state = backend.shutdown();
+    userspace_udp_router::packet_io::finish_dispatch(
+        outcome,
+        final_state,
+        backend_state,
+        |summary| {
+            parallel_snapshot(
+                &pool,
+                &monitor,
+                &mut sampler,
+                epoch,
+                false,
+                tx,
+                tx_bytes,
+                io_drops,
+            )?;
+            report_parallel(summary, io_drops);
+            Ok(())
+        },
+    )?;
     Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
+fn parallel_snapshot(
+    pool: &userspace_udp_router::parallel::Pool,
+    monitor: &MonitorOptions,
+    sampler: &mut userspace_udp_router::observability::Sampler,
+    epoch: Instant,
+    running: bool,
+    tx: u64,
+    bytes: u64,
+    blocked: u64,
+) -> io::Result<()> {
+    let Some(path) = &monitor.path else {
+        return Ok(());
+    };
+    if monitor.interfaces.len() != 2
+        || monitor.interfaces.iter().any(|n| {
+            n.is_empty()
+                || n.len() > 15
+                || !n
+                    .bytes()
+                    .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
+        })
+    {
+        return Err(io::Error::other("unsafe interface name"));
+    }
+    let observed = pool
+        .observation()
+        .map_err(io::Error::other)?
+        .ok_or_else(|| io::Error::other("monitor disabled"))?;
+    let now = epoch.elapsed().as_nanos() as u64;
+    let unix = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(io::Error::other)?
+        .as_secs();
+    snapshot_store(
+        path,
+        &sampler.json(
+            &observed,
+            now,
+            unix,
+            running,
+            &monitor.interfaces,
+            tx,
+            bytes,
+            blocked,
+        ),
+    )
 }
