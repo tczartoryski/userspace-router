@@ -346,7 +346,7 @@ def profile_start(lab, pid, mode):
         return []
     commands = ([['perf','record','-e','cpu-clock','-F','999','-g','-p',str(pid),'-o',str(lab.root/'perf.data')],
                  ['perf','stat','-x,','-e','task-clock,context-switches,page-faults','-p',str(pid),'-o',str(lab.root/'perf-stat.txt')]]
-                if mode == 'perf' else [['strace','-c','-p',str(pid),'-o',str(lab.root/'strace.txt')]])
+                if mode == 'perf' else [['strace','-f','-c','-p',str(pid),'-o',str(lab.root/'strace.txt')]])
     children = [lab.spawn(lab.r,args,'profiler-'+str(i)) for i,args in enumerate(commands)]
     time.sleep(.15)
     check(all(p.poll() is None for p in children), 'profiler attach failed')
@@ -438,7 +438,14 @@ def probe(directory, size, flows):
     save(Path(directory)/'control.json', {'no_delivery': True, 'outcome':outcome})
 
 
-def experiment(binary, backend, mode, size, flows, count, window, profile, deadline):
+def router_arguments(flows, workers, queue_depth):
+    check(workers in (1,2,4) and 1 <= queue_depth <= 1024, 'worker/queue bounds')
+    check((workers+1)*queue_depth <= 4096, 'total queue slots exceed 4096')
+    return ['--ports','40000-49999','--max-flows',str(max(flows,workers)),
+            '--workers',str(workers),'--queue-depth',str(queue_depth),'--idle-seconds','120']
+
+
+def experiment(binary, backend, mode, size, flows, count, window, profile, deadline, workers=1, queue_depth=64):
     with tempfile.TemporaryDirectory(prefix='router-v2-private-') as tmp:
         lab = Lab(tmp, deadline)
         router = None
@@ -449,8 +456,7 @@ def experiment(binary, backend, mode, size, flows, count, window, profile, deadl
             check(load(lab.root/'server.ready') == {'ready':True}, 'server readiness schema')
             if backend == 'user':
                 env = dict(os.environ, PYTHONDONTWRITEBYTECODE='1',
-                           UDP_ROUTER_EXTRA_ARGS=json.dumps(['--ports','40000-49999','--max-flows',str(flows),
-                                                           '--idle-seconds','120']))
+                           UDP_ROUTER_EXTRA_ARGS=json.dumps(router_arguments(flows,workers,queue_depth)))
                 router = lab.spawn(lab.r,[sys.executable,'-B',SCRIPT,'launch',lab.c,lab.s,binary],'router',env)
                 end = time.monotonic()+4
                 while 'userspace forwarding ready' not in (lab.root/'router.log').read_text():
@@ -505,6 +511,8 @@ def experiment(binary, backend, mode, size, flows, count, window, profile, deadl
             busy_ticks = total_ticks-(guest_after['idle']-guest_before['idle'])
             result.update(backend=backend, mode=mode, size=size, flows=flows, window=window,
                           profile=profile, diagnostic=diagnostic, negative_control=control,
+                          workers=workers if backend == 'user' else None, queue_depth=queue_depth if backend == 'user' and workers > 1 else None,
+                          worker_note='4 workers oversubscribe the approved 2-vCPU lab' if backend == 'user' and workers == 4 else '',
                           delivered_pps=result['received']/wall_seconds,
                           delivered_ip_mbps=result['received']*size*8/wall_seconds/1e6,
                           delivered_udp_goodput_mbps=result['received']*(size-28)*8/wall_seconds/1e6,
@@ -540,11 +548,11 @@ def aggregate(values):
 def summarize(rows):
     groups = {}
     for row in rows:
-        key = tuple(row[k] for k in ('backend','mode','size','flows','profile'))
+        key = tuple(row[k] for k in ('backend','mode','size','flows','profile','workers','queue_depth'))
         groups.setdefault(key,[]).append(row)
     result = []
     for key,group in sorted(groups.items()):
-        result.append(dict(zip(('backend','mode','size','flows','profile'),key),
+        result.append(dict(zip(('backend','mode','size','flows','profile','workers','queue_depth'),key),
                            repeats=len(group), delivered_pps=aggregate([r['delivered_pps'] for r in group]),
                            rtt_p50_ns=aggregate([r['rtt']['p50_ns'] for r in group]),
                            rtt_p95_ns=aggregate([r['rtt']['p95_ns'] for r in group]),
@@ -575,6 +583,8 @@ def main():
     parser.add_argument('--flows',type=int,default=64)
     parser.add_argument('--count',type=int,default=1500)
     parser.add_argument('--window',type=int,choices=(64,128),default=64)
+    parser.add_argument('--workers',type=int,choices=(1,2,4),default=1)
+    parser.add_argument('--queue-depth',type=int,default=64)
     parser.add_argument('--repeats',type=int,default=3)
     parser.add_argument('--backend',choices=('both','user','kernel'),default='both')
     parser.add_argument('--mode',choices=('both',*MODES),default='both')
@@ -583,6 +593,7 @@ def main():
     parser.add_argument('--output',type=Path,required=True)
     a = parser.parse_args(args)
     check(1 <= a.flows <= 512 and a.flows <= a.count <= 20000, 'flow/count bounds')
+    router_arguments(a.flows,a.workers,a.queue_depth)
     check(3 <= a.repeats <= 5, 'repeats 3..5')
     check(re.fullmatch(r'[A-Za-z0-9 .,+()=_-]{1,240}',a.metadata), 'generic metadata only')
     check(a.profile == 'none' or a.backend == 'user', 'profiling is a separate userspace diagnostic job')
@@ -602,7 +613,7 @@ def main():
             for backend in backends[::1 if repeat % 2 == 0 else -1]:
                 for mode in modes:
                     row = experiment(str(a.binary.resolve()),backend,mode,a.size,a.flows,a.count,
-                                     a.window,a.profile,deadline)
+                                     a.window,a.profile,deadline,a.workers,a.queue_depth)
                     row['repeat'] = repeat+1
                     rows.append(row)
         summary = summarize(rows)
@@ -614,11 +625,11 @@ def main():
         save(a.output,result)
         lines = ['# Actual Linux E2E run', '',a.metadata,'',result['kind'], '',
                  'Contextual TUN userspace versus veth kernel comparison. No isolated algorithm speedup claim.', '',
-                 '| Backend | Mode | Size | Flows | PPS median (min..max) | PPS CV | Loss per repeat |',
-                 '|---|---|---:|---:|---:|---:|---|']
+                 '| Backend | Mode | Size | Flows | Workers | PPS median (min..max) | PPS CV | Loss per repeat |',
+                 '|---|---|---:|---:|---:|---:|---:|---|']
         for r in summary:
             v = r['delivered_pps']
-            lines.append(f"| {r['backend']} | {r['mode']} | {r['size']} | {r['flows']} | {v['median']:.1f} ({v['minimum']:.1f}..{v['maximum']:.1f}) | {v['cv']:.3f} | {r['dropped']} |")
+            lines.append(f"| {r['backend']} | {r['mode']} | {r['size']} | {r['flows']} | {r['workers']} | {v['median']:.1f} ({v['minimum']:.1f}..{v['maximum']:.1f}) | {v['cv']:.3f} | {r['dropped']} |")
         a.output.with_suffix('.md').write_text('\n'.join(lines)+'\n')
         print(f'Validated {len(rows)} real experiments; no generated data is release-allowlisted')
     finally:

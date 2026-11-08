@@ -202,5 +202,28 @@ class ProfilingTests(unittest.TestCase):
             child.send_signal.assert_called_with(signal.SIGINT)
 
 
+class WorkerHarnessTests(unittest.TestCase):
+    def test_worker_overrides_keep_positive_shards_and_bounded_queues(self):
+        for workers in (1,2,4):
+            args = bench.router_arguments(1,workers,64)
+            self.assertEqual(args[args.index('--workers')+1],str(workers))
+            self.assertEqual(args[args.index('--max-flows')+1],str(workers))
+            self.assertEqual(args[args.index('--ports')+1],'40000-49999')
+        for workers,queue in ((0,64),(3,64),(4,0),(4,1024)):
+            with self.assertRaises(ValueError): bench.router_arguments(64,workers,queue)
+
+    def test_worker_counts_remain_separate_in_repeat_aggregation(self):
+        rows = []
+        for workers in (1,2,4):
+            for repeat in range(3):
+                rows.append(dict(backend='user',mode='warm',size=64,flows=64,profile='none',
+                                 workers=workers,queue_depth=None if workers == 1 else 64,
+                                 delivered_pps=100+repeat,dropped=0,
+                                 rtt=dict(p50_ns=1,p95_ns=2,p99_ns=3)))
+        summary = bench.summarize(rows)
+        self.assertEqual([r['workers'] for r in summary],[1,2,4])
+        self.assertTrue(all(r['repeats'] == 3 for r in summary))
+
+
 if __name__ == '__main__':
     unittest.main()

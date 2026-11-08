@@ -54,8 +54,11 @@ flowchart LR
 
 ## Measured v2 work — feature branch
 
-The reference runtime is still single-worker TUN. Multicore and AF_XDP are not
-implemented or verified yet; the v2 roadmap remains open.
+Default reference remains single-worker TUN. Opt-in bounded worker ownership
+is implemented and Linux-tested, but is **15.68–24.69% slower** and worsens
+median p99 in the tested 2-vCPU workloads. Four workers are oversubscribed.
+[Measured multicore results](docs/MULTICORE-RESULTS.md). AF_XDP remains
+unimplemented; observability/resilience and the v2 roadmap remain open.
 
 Software profiling identified redundant full-table expiry scans. Skipping sweeps
 within the same monotonic integer second improved completed UDP echo throughput
@@ -82,7 +85,7 @@ cargo test --locked --offline
 python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-The current checks have **19 Rust and 48 Python tests**, plus a controlled-clock
+The current checks have **26 Rust and 50 Python tests**, plus a controlled-clock
 JavaScript replay test. Documentation checks cover links, SVG safety and packaging preservation. Portable tests do not
 exercise Linux TUN I/O. No Cargo or Python package dependencies are required.
 

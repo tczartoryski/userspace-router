@@ -207,8 +207,8 @@ sudo -n env UDP_ROUTER_ISOLATED_LINUX=YES bash scripts/linux-benchmark.sh \
 
 Perf attaches to the actual forwarding PID after warm seeds: software cpu-clock
 record at 999 Hz with callchains and separate task-clock/context-switch/page-fault
-stat. No unsupported hardware cycles/instructions are requested. Strace -c
-attaches to that same process. Attachment liveness is checked before go; profiler
+stat. No unsupported hardware cycles/instructions are requested. Strace -f -c
+attaches to that same process including its threads. Attachment liveness is checked before go; profiler
 SIGINT completion is bounded before router shutdown. Raw profiler data, process
 logs and per-sequence evidence live only in private temporary directories outside
 the checkout and are removed during cleanup. Selected outputs retain bounded
@@ -230,3 +230,17 @@ this implementation phase.
 For less timer-quantized process CPU and targeted stability checks, --count 20000 is also accepted without profiling, under the same 140-second job and 8-second exchange deadlines. Defaults remain 1500; compare identical counts/windows and compiler settings. Longer batches are still workload-limited, not maximum capacity.
 
 Rate naming: legacy delivered_pps counts completed echo replies per second. Every validated echo entails two actual router packet traversals, but this field is not their sum. Report completed echoes/s or explicitly derive bidirectional packet processing from verified counters; do not present it as NIC line rate.
+
+
+## Opt-in worker ownership milestone
+
+The [multicore design](MULTICORE-DESIGN.md) defines the new owned packet-I/O
+boundary, per-worker NAT ranges/capacities, bounded queues and shutdown limits.
+`--workers 1` retains the original reference loop; `--workers 2` or `4` selects
+actual independent worker states behind one dispatcher. `--queue-depth 64` is
+the default; all packet channels are bounded and nonblocking on send. Results
+record actual requested worker/queue configuration and keep repeat groups separate.
+Four workers oversubscribe the approved 2-vCPU guest. [Actual multicore results](MULTICORE-RESULTS.md) report throughput and p99
+regressions. Run matched cells and examine p99, losses, CPU and RSS, not
+only PPS; existing 64-byte and 512-byte p99 regressions remain unresolved.
+Parallel snapshots and AF_XDP remain unimplemented and explicitly disclosed.

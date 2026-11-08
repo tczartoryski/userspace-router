@@ -28,8 +28,7 @@ not one-way forwarding latency. MICRO calls use generated packet layouts.
 
 ## Next dependencies and remaining gates
 
-1. Small pluggable packet-I/O boundary preserving reference TUN: buffer ownership, nonblocking receive/transmit, bounded backpressure/drop semantics and shutdown. Approximate engineering effort1–2working days.
-2. Multicore design/implementation: per-worker state and collision-free ports, both-direction affinity, bounded queues, shutdown/race testing and actual1/2/4-worker measurements. Approved guest has only2CPUs;4workers must be labeled oversubscribed, not4-core scaling. Approximate effort3–5days, uncertain until ownership design is validated.
+1. Packet-I/O and ownership milestone completed and measured below. Reference remains default because multicore regressed. Further changes need profile-selected justification, not worker-count marketing.
 3. Extend existing real-state loopback dashboard: per-worker/queue/backend/rate metrics and optional bounded privacy-preserving decision samples; measure overhead. Approximate effort1–2days after ownership settles.
 4. Resilience/overload/concurrency/fuzz gates, architecture diagrams/charts, compelling real demo, sanitized feature-branch publication and final review PR. Approximate effort2–3days; no merge without explicit approval.
 5. AF_XDP remains conditional and unimplemented/unverified. Investigate safe disposable-interface feasibility, account for Ethernet/L2 and ring ownership; no real-interface attachment, privileged installation or zero-copy claim without authority/evidence.
@@ -46,3 +45,42 @@ dollar/token costs are unavailable, not estimated. Benchmarks have explicit job,
 exchange, packet-count and retry bounds; no simultaneous performance cells.
 Original private development history stays separate and unpublished. Only the
 sanitized public ancestry is used. No final PR or full-v2 completion claim yet.
+
+
+## Packet-I/O / ownership milestone (Linux acceptance measured)
+
+Design was written first in [MULTICORE-DESIGN.md](MULTICORE-DESIGN.md). Implemented
+an owned nonblocking PacketIo contract and TUN adapter, plus opt-in std-thread
+per-worker Router states with disjoint external port ranges/capacity remainders,
+internal-socket outbound affinity and reverse external-port ownership. No shared
+NAT lock or new dependency. All input/output queues and interrupt retries are
+bounded; output notification is nonblocking, saturation drops are counted, and
+shutdown joins all workers even after panic. Default workers=1 preserves the
+reference loop and snapshots. Multicore --snapshot is explicitly rejected until
+actual aggregate/private export exists; live dashboard/decision sampling remains
+next-stage work. Worker queue counters are separate from core decisions.
+
+Portable tests cover real worker threads, replies and collision-free ownership,
+wrong remote address/port before refresh, exact expiry/backward clocks, partition
+remainders including port65535, truncated input, bounded I/O, full queues and panic
+shutdown. Guest tools accept workers1/2/4, preserve separate repeat groups and
+label4workers oversubscribed on2vCPU. Original tiny-pool reference integration
+fixtures remain unchanged; opt-in worker integration uses the real-socket harness.
+Linux acceptance and matched1/2/4-worker measurements completed:26 native Rust
+tests, original capacity/port extended suites and two-worker extended suite pass.
+27 actual experiments have zero payload losses/failed sends. See
+[multicore results](MULTICORE-RESULTS.md). Throughput regressed15.68–24.69%
+and median p99 worsened: keep reference default. Aggregate process profiling
+includes threads; separate per-worker CPU, sustained live overload and four-worker
+adversarial expiry stress remain pending. No generated
+result, throughput scaling, p99 improvement or full-v2 completion is claimed.
+Known64-byte and512-byte p99 regressions remain prominent acceptance concerns.
+AF_XDP is conditional/unimplemented with exact blockers in the design. Approved VM used for bounded validation then verified stopped. No installs,
+host networking changes, extra agents or releases.
+
+Portable gate for this milestone:26 Rust tests (19 existing plus7 I/O/worker
+checks),50 Python tests (48 existing plus2 worker-tooling checks), Rust fmt,
+strict Clippy including Linux ABI, JS syntax/replay, shell syntax, package
+round-trip/allowlist and whitespace checks pass. Actual Linux results are verified above. The explicit manifest is regenerated;
+historical benchmark artifacts are unchanged. Nine audited raw measurement files
+are explicitly allowlisted; private raw logs remain outside the repository.

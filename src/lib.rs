@@ -1,4 +1,6 @@
 //! Portable IPv4/UDP forwarding and endpoint-dependent SNAT. No socket or OS I/O.
+pub mod packet_io;
+pub mod parallel;
 use std::collections::BTreeMap;
 use std::net::Ipv4Addr;
 
