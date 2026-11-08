@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "source_commit": "76e2463aa8f13bba20d43350886e761da2e100be",
+  "date": "2026-11-07",
+  "environment": {
+    "os": "Ubuntu 24.04 ARM64",
+    "kernel": "6.8.0-147-generic",
+    "rust": "1.89.0",
+    "cpus": 2,
+    "memory_gib": 3,
+    "vm": "Apple Virtualization via Lima 2.3.0"
+  },
+  "portable_rust": {
+    "passed": 17,
+    "failed": 0
+  },
+  "integration": {
+    "command": "bash scripts/guest-demo.sh",
+    "exit_code": 0,
+    "extended_runs": 2,
+    "verified": [
+      "distinct clients sharing source port",
+      "independent flow capacity and port pool exhaustion",
+      "idle expiration and late replies",
+      "longest-prefix policy",
+      "stopped-router path failure"
+    ],
+    "remaining_namespaces": 0
+  },
+  "profiling_probe": {
+    "software_task_clock": "available",
+    "cpu_clock_record": "available",
+    "cycles": "not supported",
+    "instructions": "not supported",
+    "strace": "6.8",
+    "perf_event_paranoid": 4
+  },
+  "runtime_after": "VM stopped",
+  "limitations": [
+    "Correctness baseline, not throughput measurement.",
+    "Private PASS.json requires privileged guest reads; report based on successful wrapper exit and its two PASS summaries."
+  ]
+}

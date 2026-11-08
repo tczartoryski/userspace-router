@@ -19,6 +19,13 @@ BINARY_FILES = frozenset(name for name in RENDERED_FILES if not name.endswith('.
 FILES.extend(RENDERED_FILES)
 # Reviewed source/UI allowlist. Generated scenario JSON requires separate review.
 FILES.extend([
+    'examples/core_bench.rs',
+    'scripts/benchmark.py',
+    'scripts/test_benchmark.py',
+    'docs/AGENT_PROGRESS.md',
+    'docs/PERFORMANCE-BASELINE.md',
+    'docs/benchmarks/baseline-macos.json',
+    'docs/benchmarks/baseline-macos.md', 'docs/benchmarks/linux-integration-baseline.json',
     'dashboard/app.js',
     'dashboard/index.html',
     'dashboard/style.css',
