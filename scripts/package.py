@@ -113,6 +113,10 @@ FILES.extend(LIVE_FILES)
 BINARY_FILES = BINARY_FILES | {name for name in LIVE_FILES if name.endswith(('.png', '.mp4'))}
 
 
+FILES.extend(['docs/V2-PUBLICATION-AUDIT.md', 'docs/qa/v2-publication/desktop.png', 'docs/qa/v2-publication/mobile.png'])
+BINARY_FILES = BINARY_FILES | {'docs/qa/v2-publication/desktop.png', 'docs/qa/v2-publication/mobile.png'}
+
+
 def sanitize_architecture(text):
     """Drop historical sections by heading, including on an already clean input."""
     sections = re.split(r'(?=^## )', text, flags=re.M)

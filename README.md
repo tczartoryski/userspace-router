@@ -146,8 +146,8 @@ current → stale → recovered → stopped states from actual UDP forwarding.
 
 [![Genuine sampled live v2 dashboard poster, frame 3](docs/qa/v2-live/frames/0003.png)](docs/qa/v2-live/live-v2.mp4)
 
-[Download sampled live video](https://raw.githubusercontent.com/tczartoryski/userspace-router/feat/router-v2/docs/qa/v2-live/live-v2.mp4)
-(inline playback is not guaranteed; feature-branch URL changes with the branch).
+[Download sampled live video](https://raw.githubusercontent.com/tczartoryski/userspace-router/f82b7023b86f9ce8bdc007c92c6b565a12779a89/docs/qa/v2-live/live-v2.mp4)
+(immutable verified download; inline playback is not guaranteed).
 44 genuine stills targeted at 1 Hz, encoded at 1 fps for 44 seconds, no audio;
 not continuous full-frame-rate footage. Chapters: current 3.579 s, stale 19.568 s,
 recovery 21.565 s, stopped/offline 33.588 s. All source frames and timestamps are
