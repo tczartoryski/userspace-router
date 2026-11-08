@@ -195,9 +195,9 @@ def client(directory, size, flows, count, window, mode):
                     for seq in list(pending):
                         if now-pending[seq] >= 500_000_000:
                             del pending[seq]
-                # Include a bounded final drain to observe late/duplicate responses.
+                # Missing replies alone enable bounded late collection; stop on completion.
                 drain = time.monotonic()+(.05 if len(received) < len(sent) else 0)
-                while time.monotonic() < drain:
+                while len(received) < len(sent) and time.monotonic() < drain:
                     for key, _ in poll.select(.005):
                         for _ in range(128):
                             try:
@@ -582,7 +582,7 @@ def main():
     parser.add_argument('--metadata',required=True,help='generic OS/CPU/compiler label; no paths or identifiers')
     parser.add_argument('--output',type=Path,required=True)
     a = parser.parse_args(args)
-    check(1 <= a.flows <= 512 and a.flows <= a.count <= (20000 if a.profile != 'none' else 2000), 'flow/count bounds')
+    check(1 <= a.flows <= 512 and a.flows <= a.count <= 20000, 'flow/count bounds')
     check(3 <= a.repeats <= 5, 'repeats 3..5')
     check(re.fullmatch(r'[A-Za-z0-9 .,+()=_-]{1,240}',a.metadata), 'generic metadata only')
     check(a.profile == 'none' or a.backend == 'user', 'profiling is a separate userspace diagnostic job')

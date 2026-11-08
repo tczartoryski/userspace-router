@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "measurement": "actual kernel UDP echo round trips in isolated 2-vCPU Linux guest",
+  "rate_definition": "delivered_pps is completed echo replies per second; each verified echo crosses router twice; not NIC line rate",
+  "before_core": "76e2463aa8f13bba20d43350886e761da2e100be",
+  "optimization": "skip redundant expiration sweeps at unchanged monotonic integer second",
+  "rows": [
+    {
+      "ipv4_bytes": 64,
+      "flows": 512,
+      "count_per_repeat": 20000,
+      "repeats": 3,
+      "before": {
+        "completed_echoes_per_second": {
+          "cv": 0.020414752805864227,
+          "maximum": 94939.76646203571,
+          "median": 92037.6405602298,
+          "minimum": 91379.86251552441
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 569025,
+          "p95_ns": 758866,
+          "p99_ns": 1243553
+        },
+        "router_cpu_seconds_median": 0.08,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "after": {
+        "completed_echoes_per_second": {
+          "cv": 0.039785585293509895,
+          "maximum": 105699.07031801358,
+          "median": 104823.94281581377,
+          "minimum": 98210.44511591035
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 468769,
+          "p95_ns": 668819,
+          "p99_ns": 1847787
+        },
+        "router_cpu_seconds_median": 0.06,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "throughput_change_percent": 13.892470708456027
+    },
+    {
+      "ipv4_bytes": 128,
+      "flows": 512,
+      "count_per_repeat": 20000,
+      "repeats": 3,
+      "before": {
+        "completed_echoes_per_second": {
+          "cv": 0.020264086845619304,
+          "maximum": 92872.144627339,
+          "median": 90659.17364970085,
+          "minimum": 89214.30102569013
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 586272,
+          "p95_ns": 770112,
+          "p99_ns": 910617
+        },
+        "router_cpu_seconds_median": 0.09,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "after": {
+        "completed_echoes_per_second": {
+          "cv": 0.008498985135003058,
+          "maximum": 105098.29793884528,
+          "median": 104775.63905203067,
+          "minimum": 103425.25197442426
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 477102,
+          "p95_ns": 682736,
+          "p99_ns": 821075
+        },
+        "router_cpu_seconds_median": 0.06,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "throughput_change_percent": 15.570917794678586
+    },
+    {
+      "ipv4_bytes": 512,
+      "flows": 512,
+      "count_per_repeat": 20000,
+      "repeats": 3,
+      "before": {
+        "completed_echoes_per_second": {
+          "cv": 0.039165060318917436,
+          "maximum": 87400.02900632162,
+          "median": 86336.85286665203,
+          "minimum": 81178.3215208187
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 652399,
+          "p95_ns": 850988,
+          "p99_ns": 974951
+        },
+        "router_cpu_seconds_median": 0.09,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "after": {
+        "completed_echoes_per_second": {
+          "cv": 0.0203753750209511,
+          "maximum": 98021.22542793506,
+          "median": 95167.20518695147,
+          "minimum": 94286.11838254823
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 538018,
+          "p95_ns": 714148,
+          "p99_ns": 1040535
+        },
+        "router_cpu_seconds_median": 0.07,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "throughput_change_percent": 10.227790366574974
+    },
+    {
+      "ipv4_bytes": 1400,
+      "flows": 512,
+      "count_per_repeat": 20000,
+      "repeats": 3,
+      "before": {
+        "completed_echoes_per_second": {
+          "cv": 0.012388504645331276,
+          "maximum": 69650.54451698708,
+          "median": 68249.31108889452,
+          "minimum": 68114.07022472093
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 890694,
+          "p95_ns": 1174827,
+          "p99_ns": 1270498
+        },
+        "router_cpu_seconds_median": 0.13,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "after": {
+        "completed_echoes_per_second": {
+          "cv": 0.021107562048903093,
+          "maximum": 81790.20837724104,
+          "median": 81738.36512202381,
+          "minimum": 78811.36292615684
+        },
+        "rtt_ns_median_of_repeat_quantiles": {
+          "p50_ns": 694022,
+          "p95_ns": 913946,
+          "p99_ns": 1172622
+        },
+        "router_cpu_seconds_median": 0.09,
+        "router_sampled_rss_bytes_median": 1835008,
+        "drops": 0,
+        "send_failed": 0
+      },
+      "throughput_change_percent": 19.764381233914328
+    }
+  ],
+  "limitations": [
+    "TUN userspace and kernel-veth comparator have explicitly different device paths and NAT semantics.",
+    "Median of three repeat percentiles is not a pooled percentile.",
+    "64-byte and 512-byte p99 RTT medians regressed; no universal latency improvement claim.",
+    "Python endpoints and 2-vCPU scheduling bound the workload; no maximum capacity claim."
+  ]
+}

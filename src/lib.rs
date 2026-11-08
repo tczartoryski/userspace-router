@@ -201,6 +201,12 @@ impl Router {
         if now < self.last_time {
             return Err(DropReason::Clock);
         }
+        // At an unchanged integer second, survivors cannot newly expire and
+        // inserted/refreshed flows have age zero (idle_seconds is at least one).
+        // The initial last_time == 0 is safe because the table starts empty.
+        if now == self.last_time {
+            return Ok(());
+        }
         self.last_time = now;
         let before = self.flows.len();
         self.flows

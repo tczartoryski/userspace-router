@@ -1,9 +1,11 @@
 # Router v2 Linux E2E methodology
 
 This phase implements a bounded real UDP harness and optional software profiling.
-**Guest execution and performance acceptance are pending coordinator runs.** No
-Linux measurements were generated during implementation. The core, Linux adapter,
-old tests and existing macOS MICRO baseline remain unchanged. The earlier
+The coordinator subsequently completed 144 baseline E2E experiments and three
+runs each of software perf and strace, with zero measured payload loss, before
+core edits. The [optimization record](OPTIMIZATION-RESULTS.md) identifies that
+baseline and the now-pending after measurements. The Linux adapter, old tests
+and existing macOS/Linux MICRO baseline artifacts remain unchanged. The earlier
 `process` MICRO timings cover the entire public forwarding path, not pure NAT
 lookup. No optimization is authorized by source rationale alone.
 
@@ -47,7 +49,7 @@ done
 ```
 
 Keep the VM limits fixed; do not run cells concurrently on the 2-vCPU guest.
-Counts are configurable up to 2000 for headline runs (default 1500), flows
+Counts are configurable up to 20000 for headline runs (default 1500), flows
 1..512 and count at least flows; window is 64 or 128, repeats 3..5. Use the same
 count/window/compiler/metadata for comparisons. `--backend user|kernel` and
 `--mode cold|warm` can split a job further. Results include every repeat and
@@ -126,8 +128,16 @@ as send_failed. Each pending request times out after 500 ms without retry. Late
 valid replies within the final observation grace still count. An up-to-50-ms final
 receive grace observes duplicates/late packets; it is **included** in elapsed
 wall and rate denominator, so this is a finite-batch delivered rate, not a
-saturation/capacity claim. The grace runs only while replies are missing, never as a forced idle tail after complete delivery. Small lossy batches can be dominated by grace
-and Python work. The bounded drain handles at most 128 packets per readiness
+saturation/capacity claim. The grace starts only when replies are missing and
+stops as soon as all unique replies have arrived; complete batches have no
+forced idle tail. `wall_ns` is the monotonic interval from exchange entry,
+before payload preparation/first send, through completion of the pending-request
+loop and any conditional late collection. It includes Python payload work,
+selector handling and timeout checks, but excludes warm seeding, subsequent
+RTT sorting/JSON writing and clock calibration. PPS uses precisely this same
+window and counts any valid late replies collected within it. It is not a
+first-send-to-last-recv-only or rate-adjusted duration. Small lossy batches can
+be dominated by timeout/grace and Python work. The bounded drain handles at most 128 packets per readiness
 pass; it cannot spin indefinitely.
 
 RTT is monotonic_ns immediately before sendto through immediately after recvmsg
@@ -196,7 +206,7 @@ sudo -n env UDP_ROUTER_ISOLATED_LINUX=YES bash scripts/linux-benchmark.sh \
 ```
 
 Perf attaches to the actual forwarding PID after warm seeds: software cpu-clock
-record at 99999 Hz with callchains and separate task-clock/context-switch/page-fault
+record at 999 Hz with callchains and separate task-clock/context-switch/page-fault
 stat. No unsupported hardware cycles/instructions are requested. Strace -c
 attaches to that same process. Attachment liveness is checked before go; profiler
 SIGINT completion is bounded before router shutdown. Raw profiler data, process
@@ -216,3 +226,7 @@ any core edit. Compare generator/receiver CPU and workload ceilings first: on a
 before/after conditions, variability and security/correctness gates. No speedup,
 production capacity, hardware-counter result or real guest profile is claimed by
 this implementation phase.
+
+For less timer-quantized process CPU and targeted stability checks, --count 20000 is also accepted without profiling, under the same 140-second job and 8-second exchange deadlines. Defaults remain 1500; compare identical counts/windows and compiler settings. Longer batches are still workload-limited, not maximum capacity.
+
+Rate naming: legacy delivered_pps counts completed echo replies per second. Every validated echo entails two actual router packet traversals, but this field is not their sum. Report completed echoes/s or explicitly derive bidirectional packet processing from verified counters; do not present it as NIC line rate.

@@ -1,5 +1,7 @@
 # Router v2 audit and portable baseline
 
+Subsequent target-Linux E2E/profile and measured optimization results are now recorded in [optimization results](OPTIMIZATION-RESULTS.md). This document preserves the initial portable baseline and source audit.
+
 November 7, 2026: source audit plus actual local release MICRO execution. Core
 `src/lib.rs`, `src/linux.rs`, existing tests and historical video/evidence claims
 are unchanged. This is not Linux profiling or an end-to-end throughput result.

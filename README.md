@@ -52,6 +52,25 @@ flowchart LR
 
 [Detailed architecture and safety boundaries](docs/ARCHITECTURE.md) · [Topology diagram](docs/architecture.svg)
 
+## Measured v2 work — feature branch
+
+The reference runtime is still single-worker TUN. Multicore and AF_XDP are not
+implemented or verified yet; the v2 roadmap remains open.
+
+Software profiling identified redundant full-table expiry scans. Skipping sweeps
+within the same monotonic integer second improved completed UDP echo throughput
+by **10.23–19.76%** across four longer 512-flow packet-size cases in the isolated
+2-vCPU Linux lab. All 252 retained experiments had zero payload losses.
+
+This is not a universal latency win: 64-byte p99 socket RTT regressed from
+1.244 ms to 1.848 ms. TUN versus kernel-veth comparison has different device and
+NAT paths; lab observations are not NIC line-rate or production-capacity claims.
+
+[Results and raw evidence](docs/benchmarks/optimization-comparison.md) ·
+[Methodology](docs/BENCHMARK-METHODOLOGY.md) ·
+[Optimization proof](docs/OPTIMIZATION-RESULTS.md) ·
+[Remaining roadmap](docs/AGENT_PROGRESS.md)
+
 ## Quickstart
 
 ### Portable checks
@@ -63,7 +82,7 @@ cargo test --locked --offline
 python3 -m unittest discover -s scripts -p 'test_*.py'
 ```
 
-The current checks have **17 Rust and 35 Python tests**, plus a controlled-clock
+The current checks have **19 Rust and 48 Python tests**, plus a controlled-clock
 JavaScript replay test. Documentation checks cover links, SVG safety and packaging preservation. Portable tests do not
 exercise Linux TUN I/O. No Cargo or Python package dependencies are required.
 
@@ -100,7 +119,7 @@ cleans up its processes/staging and stops the VM.
 ## Scope and publication
 
 This is an experimental IPv4/UDP router. TCP, IPv6, fragmentation, L2 and ICMP
-generation are unsupported. There is no throughput or production-readiness claim;
+generation are unsupported. Measured lab results are available below; there is no NIC-capacity or production-readiness claim;
 the stdlib dashboard is a local lab tool.
 
 [Public repository](https://github.com/tczartoryski/userspace-router), published after a reachable-history and media audit.

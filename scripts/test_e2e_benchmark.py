@@ -119,7 +119,7 @@ class E2ETests(unittest.TestCase):
 
 
 class GeneratorTests(unittest.TestCase):
-    def test_warm_generator_reuses_sockets_and_validates_immediate_replies(self):
+    def run_generator(self, late=False):
         # Deterministic socket/selector doubles exercise actual generator control flow.
         sockets = []
         clock = [0.0]
@@ -135,12 +135,13 @@ class GeneratorTests(unittest.TestCase):
             def register(self,sock,events,data): pass
             def select(self,timeout):
                 clock[0] += .006
-                return [(Mock(fileobj=s,data=s.flow),1) for s in sockets if s.queue]
+                return [(Mock(fileobj=s,data=s.flow),1) for s in sockets
+                        if s.queue and (not late or s.queue[0][4] == 0 or clock[0] >= .515)]
         def udp(address):
             sock = Sock(len(sockets)); sockets.append(sock); return sock
         def receive(sock):
             if not sock.queue: raise BlockingIOError()
-            return sock.queue.pop(0),bench.REMOTE,int(clock[0]*1e9)+100
+            return sock.queue.pop(0),bench.REMOTE,int(clock[0]*1e9)
         with tempfile.TemporaryDirectory() as tmp:
             (Path(tmp)/'go').write_text('{}')
             with patch.object(bench,'udp',side_effect=udp), patch.object(bench,'receive',side_effect=receive), \
@@ -153,6 +154,21 @@ class GeneratorTests(unittest.TestCase):
             self.assertEqual(result['dropped'],0)
             self.assertEqual(len(sockets),2)
             self.assertEqual(result['rtt']['samples'],8)
+            return result, clock[0]
+
+    def test_warm_generator_reuses_sockets_and_validates_immediate_replies(self):
+        result, clock = self.run_generator()
+        # One selector pass per exchange, with no forced 50-ms idle tail.
+        self.assertEqual(result['wall_ns'],6_000_000)
+        self.assertAlmostEqual(clock,.012)
+
+    def test_late_collection_counts_replies_and_stops_when_complete(self):
+        result, clock = self.run_generator(late=True)
+        # Replies arrive after the 500-ms timeout, during conditional collection.
+        self.assertGreaterEqual(result['wall_ns'],500_000_000)
+        self.assertLess(result['wall_ns'],520_000_000)
+        self.assertLess(clock,.53)
+        self.assertEqual(result['rtt']['p99_ns'],result['wall_ns'])
 
     def test_helper_client_dispatch_arguments(self):
         argv = ['e2e_benchmark.py','client','/tmp/fixture','64','2','8','64','warm']

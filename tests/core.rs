@@ -600,3 +600,200 @@ fn telemetry_mapping_limit_is_exact_and_output_is_bounded() {
         .telemetry(0)
         .starts_with("{\"received\":18446744073709551615,"));
 }
+
+#[test]
+fn same_second_expiry_preserves_boundaries_refresh_and_clock_errors() {
+    let mut c = config();
+    c.idle_seconds = 1;
+    let mut r = Router::new(c).unwrap();
+    r.expire(0).unwrap();
+    for _ in 0..8 {
+        r.process(Side::Inside, &outbound(1), 0).unwrap();
+        r.process(Side::Outside, &inbound(40000), 0).unwrap();
+        dropped(
+            &mut r,
+            Side::Outside,
+            &packet("198.51.100.3", 9000, "198.51.100.1", 40000, b"reply"),
+            0,
+            DropReason::Filter,
+        );
+        r.expire(0).unwrap();
+    }
+    r.process(Side::Inside, &outbound(2), 0).unwrap();
+    assert_eq!(r.active_flows(), 2);
+    r.expire(1).unwrap();
+    assert_eq!(r.counters.expired, 2);
+    dropped(
+        &mut r,
+        Side::Outside,
+        &inbound(40000),
+        1,
+        DropReason::Filter,
+    );
+    // Creation after this second's sweep survives all subsequent same-time calls.
+    let f = r.process(Side::Inside, &outbound(3), 1).unwrap();
+    let port = Packet::parse(&f.packet).unwrap().sport;
+    for _ in 0..8 {
+        r.expire(1).unwrap();
+        r.process(Side::Outside, &inbound(port), 1).unwrap();
+    }
+    assert_eq!(r.expire(0), Err(DropReason::Clock));
+    dropped(&mut r, Side::Outside, &inbound(port), 0, DropReason::Clock);
+    assert_eq!(r.active_flows(), 1);
+    r.expire(2).unwrap();
+    assert_eq!(r.active_flows(), 0);
+    assert_eq!(r.counters.expired, 3);
+    assert_eq!(
+        r.counters.received,
+        r.counters.forwarded + r.counters.drops.iter().sum::<u64>()
+    );
+}
+
+#[test]
+fn generated_same_second_operations_match_unconditional_expiry_reference() {
+    // Small independent reference: fixed slots, full expiration on EVERY call.
+    // It deliberately has no same-time shortcut or BTreeMap implementation.
+    struct Model {
+        slots: [Option<(u16, u64)>; 3],
+        next: usize,
+        clock: u64,
+        idle: u64,
+        counters: Counters,
+    }
+    impl Model {
+        fn expire(&mut self, now: u64) -> Result<(), DropReason> {
+            if now < self.clock {
+                return Err(DropReason::Clock);
+            }
+            self.clock = now;
+            for slot in &mut self.slots {
+                if slot.is_some_and(|(_, last)| now - last >= self.idle) {
+                    *slot = None;
+                    self.counters.expired += 1;
+                }
+            }
+            Ok(())
+        }
+        fn process(&mut self, op: u64, port: u16, now: u64) -> Result<u16, DropReason> {
+            self.counters.received += 1;
+            let result = (|| {
+                if op == 13 {
+                    return Err(DropReason::Checksum);
+                }
+                self.expire(now)?;
+                if op <= 5 {
+                    let existing = self
+                        .slots
+                        .iter()
+                        .position(|s| s.is_some_and(|(p, _)| p == port));
+                    let at = if let Some(at) = existing {
+                        at
+                    } else {
+                        let mut free = None;
+                        for offset in 0..3 {
+                            let at = (self.next + offset) % 3;
+                            if self.slots[at].is_none() {
+                                free = Some(at);
+                                break;
+                            }
+                        }
+                        let at = free.ok_or(DropReason::Capacity)?;
+                        self.next = (at + 1) % 3;
+                        at
+                    };
+                    self.slots[at] = Some((port, now));
+                    Ok(40000 + at as u16)
+                } else {
+                    let at = usize::from(port - 40000);
+                    let (internal, _) = self
+                        .slots
+                        .get(at)
+                        .copied()
+                        .flatten()
+                        .ok_or(DropReason::Filter)?;
+                    if op >= 10 {
+                        return Err(DropReason::Filter);
+                    }
+                    self.slots[at] = Some((internal, now));
+                    Ok(internal)
+                }
+            })();
+            match result {
+                Ok(_) => self.counters.forwarded += 1,
+                Err(reason) => self.counters.drops[reason as usize] += 1,
+            }
+            result
+        }
+    }
+    for idle in [1, 2, 10, u64::MAX] {
+        let mut c = config();
+        c.idle_seconds = idle;
+        let mut r = Router::new(c).unwrap();
+        let mut model = Model {
+            slots: [None; 3],
+            next: 0,
+            clock: 0,
+            idle,
+            counters: Counters::default(),
+        };
+        let mut seed = 0x0357_abcd_u64;
+        let mut now = 0u64;
+        for step in 0..4096 {
+            // Long same-second stretches, exact boundaries, large forward jumps,
+            // backward calls and u64 saturation all share the same state machine.
+            if step == 4000 {
+                now = u64::MAX;
+            } else if step % 32 == 0 {
+                now = now.saturating_add(if step % 64 == 0 { idle } else { 1 });
+            }
+            let at = if random(&mut seed).is_multiple_of(7) {
+                now.saturating_sub(1)
+            } else {
+                now
+            };
+            let op = random(&mut seed) % 14;
+            if op == 12 {
+                assert_eq!(r.expire(at), model.expire(at));
+            } else {
+                let port = if op <= 5 {
+                    (random(&mut seed) % 6 + 1) as u16
+                } else {
+                    40000 + (random(&mut seed) % 4) as u16
+                };
+                let (side, mut b) = if op <= 5 || op == 13 {
+                    (Side::Inside, outbound(if op == 13 { 1 } else { port }))
+                } else if op >= 10 {
+                    (
+                        Side::Outside,
+                        packet("198.51.100.3", 9000, "198.51.100.1", port, b"reply"),
+                    )
+                } else {
+                    (Side::Outside, inbound(port))
+                };
+                if op == 13 {
+                    b[28] ^= 1;
+                }
+                let expected = model.process(op, port, at);
+                let actual = r.process(side, &b, at).map(|f| {
+                    let parsed = Packet::parse(&f.packet).unwrap();
+                    assert_eq!(parsed.ttl, 63);
+                    if side == Side::Inside {
+                        parsed.sport
+                    } else {
+                        parsed.dport
+                    }
+                });
+                assert_eq!(actual, expected, "idle {idle}, step {step}, operation {op}");
+            }
+            assert_eq!(r.active_flows(), model.slots.iter().flatten().count());
+            assert_eq!(r.counters.received, model.counters.received);
+            assert_eq!(r.counters.forwarded, model.counters.forwarded);
+            assert_eq!(r.counters.expired, model.counters.expired);
+            assert_eq!(r.counters.drops, model.counters.drops);
+            assert_eq!(
+                r.counters.received,
+                r.counters.forwarded + r.counters.drops.iter().sum::<u64>()
+            );
+        }
+    }
+}
